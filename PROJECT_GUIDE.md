@@ -102,6 +102,48 @@ npm run build  # Build all workspaces
 - ✅ Backend Express + Prisma setup
 - ✅ Simple User model (id, username, timestamps)
 - ✅ VS Code workspace settings configured
+- ✅ Executable distribution setup with electron-builder
+
+## 📦 Executable Distribution
+
+The app can be packaged into executable files for distribution:
+
+### Build Commands
+
+```bash
+# Test build process
+npm run test:build
+
+# Create distributable packages
+npm run dist          # All platforms
+npm run dist:win      # Windows only
+npm run pack          # Package without installer
+
+# Individual workspace builds
+npm run build:prod    # Build all for production
+```
+
+### Distribution Files
+
+- **Windows**: `.exe` installer in `electron/dist-electron/`
+- **macOS**: `.dmg` file in `electron/dist-electron/`
+- **Linux**: `.AppImage` file in `electron/dist-electron/`
+
+### Icons
+
+App icons are stored in `electron/assets/`:
+
+- `icon.ico` - Windows (multiple sizes)
+- `icon.icns` - macOS (512x512)
+- `icon.png` - Linux (512x512)
+
+### GitHub Actions
+
+Automated builds are configured in `.github/workflows/build.yml` for:
+
+- Windows, macOS, and Linux builds
+- Triggered on version tags (`v*`) or manual dispatch
+- Artifacts uploaded for each platform
 
 ## 📞 Quick Commands
 

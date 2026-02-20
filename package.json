@@ -6,7 +6,12 @@
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\" \"npm run dev --workspace=electron\"",
-    "build": "npm run build --workspace=backend && npm run build --workspace=frontend && npm run build --workspace=electron"
+    "build": "npm run build --workspace=backend && npm run build --workspace=frontend && npm run build --workspace=electron",
+    "build:prod": "npm run build --workspace=backend && npm run export --workspace=frontend && npm run build --workspace=electron",
+    "dist": "npm run build:prod && npm run dist --workspace=electron",
+    "dist:win": "npm run build:prod && npm run dist:win --workspace=electron",
+    "pack": "npm run build:prod && npm run pack --workspace=electron",
+    "test:build": "npm run build:prod && echo 'Build completed successfully!'"
   },
   "workspaces": [
     "frontend",

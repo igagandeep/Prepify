@@ -1,28 +1,32 @@
-import { app, BrowserWindow } from 'electron'
-import { spawn } from 'child_process'
-import path from 'path'
+import { app, BrowserWindow } from 'electron';
+import { spawn } from 'child_process';
+import path from 'path';
 
-let backendProcess: any
+let backendProcess: any;
 
 function startBackend() {
-  console.log('Starting backend server...')
-  backendProcess = spawn('node', [
-    path.join(__dirname, '../../backend/dist/index.js')
-  ], {
-    stdio: 'pipe'
-  })
-  
+  console.log('Starting backend server...');
+
+  const isDev = process.env.NODE_ENV === 'development';
+  const backendPath = isDev
+    ? path.join(__dirname, '../../backend/dist/index.js')
+    : path.join(process.resourcesPath, 'backend', 'index.js');
+
+  backendProcess = spawn('node', [backendPath], {
+    stdio: 'pipe',
+  });
+
   backendProcess.stdout.on('data', (data: any) => {
-    console.log(`Backend: ${data}`)
-  })
-  
+    console.log(`Backend: ${data}`);
+  });
+
   backendProcess.stderr.on('data', (data: any) => {
-    console.error(`Backend Error: ${data}`)
-  })
-  
+    console.error(`Backend Error: ${data}`);
+  });
+
   backendProcess.on('close', (code: any) => {
-    console.log(`Backend process exited with code ${code}`)
-  })
+    console.log(`Backend process exited with code ${code}`);
+  });
 }
 
 function createWindow() {
@@ -33,24 +37,24 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
-    // Hide the menu bar
     autoHideMenuBar: true,
-    // Or completely remove it (uncomment next line instead)
-    // frame: false,
-  })
+  });
 
-  // Always load Next.js dev server for now (since frontend is running)
-  win.loadURL('http://localhost:3000')
-  
-  // Open DevTools to see any errors
-  win.webContents.openDevTools()
+  const isDev = process.env.NODE_ENV === 'development';
+
+  if (isDev) {
+    win.loadURL('http://localhost:3000');
+    win.webContents.openDevTools();
+  } else {
+    win.loadFile(path.join(process.resourcesPath, 'frontend', 'index.html'));
+  }
 }
 
 app.whenReady().then(() => {
-  startBackend()
-  createWindow()
-})
+  startBackend();
+  createWindow();
+});
 
 app.on('before-quit', () => {
-  backendProcess?.kill()
-})
+  backendProcess?.kill();
+});
