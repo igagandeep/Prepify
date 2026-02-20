@@ -11,6 +11,9 @@ build/
 out/
 *.tsbuildinfo
 
+# Electron distribution files
+electron/dist-electron/
+
 # Next.js
 .next/
 
