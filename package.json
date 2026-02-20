@@ -1,0 +1,31 @@
+{
+  "name": "prepify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A career-focused platform featuring an AI-powered resume analyzer, job application tracking, and mock interviews with AI.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\" \"npm run dev --workspace=electron\"",
+    "build": "npm run build --workspace=backend && npm run build --workspace=frontend && npm run build --workspace=electron"
+  },
+  "workspaces": [
+    "frontend",
+    "backend",
+    "electron"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/igagandeep/Prepify.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/igagandeep/Prepify/issues"
+  },
+  "homepage": "https://github.com/igagandeep/Prepify#readme"
+}
