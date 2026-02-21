@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Briefcase,
   FileText,
@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 // Marketing Homepage Component (for web/hosted version)
-function MarketingHomepage() {
+function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -31,7 +31,17 @@ function MarketingHomepage() {
             focused space.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 cursor-pointer">
+            <button
+              onClick={onSeeDemo}
+              className="text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 cursor-pointer"
+              style={{ backgroundColor: '#3948CF' }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = '#2d3ba8')
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = '#3948CF')
+              }
+            >
               <Eye className="w-5 h-5" />
               See Demo
             </button>
@@ -152,7 +162,78 @@ function MarketingHomepage() {
 }
 
 // Welcome Screen Component (for local Electron app)
-function WelcomeScreen() {
+function WelcomeScreen({ onComplete }: { onComplete: (name: string) => void }) {
+  const [name, setName] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (name.trim()) {
+      onComplete(name.trim());
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+      <div className="bg-white rounded-lg shadow-sm border p-8 w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-6">
+          <div
+            className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4"
+            style={{ backgroundColor: '#3948CF' }}
+          >
+            <span className="text-white text-2xl font-bold">P</span>
+          </div>
+          <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+            Welcome to Prepify
+          </h1>
+          <p className="text-gray-600 text-sm">
+            Enter your name to get started
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <input
+              type="text"
+              placeholder="Your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent placeholder-gray-500 text-gray-900"
+              style={{ '--tw-ring-color': '#3948CF' } as React.CSSProperties}
+              onFocus={(e) =>
+                (e.currentTarget.style.boxShadow = '0 0 0 2px #3948CF40')
+              }
+              onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
+              required
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              This name will be used locally
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            className="w-full text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            style={{ backgroundColor: '#3948CF' }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.backgroundColor = '#2d3ba8')
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.backgroundColor = '#3948CF')
+            }
+          >
+            Next
+            <span>→</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Dashboard Component
+function Dashboard({ userName }: { userName: string }) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -161,7 +242,7 @@ function WelcomeScreen() {
           <h1 className="text-2xl font-bold text-gray-900">Prepify</h1>
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <User className="w-4 h-4" />
-            Welcome back!
+            Welcome, {userName}!
           </div>
         </div>
       </header>
@@ -170,11 +251,11 @@ function WelcomeScreen() {
       <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome to Prepify
+            Welcome to Prepify, {userName}
           </h2>
           <p className="text-gray-600">
-            Your personal job search companion. Let's get started with tracking
-            your applications.
+            Your personal job search companion. Let&apos;s get started with
+            tracking your applications.
           </p>
         </div>
 
@@ -236,25 +317,47 @@ function WelcomeScreen() {
 }
 
 export default function Home() {
-  const [isElectron, setIsElectron] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Check if running in Electron
-    const checkElectron = () => {
-      if (typeof window !== 'undefined') {
-        // Check for Electron-specific properties
-        return (
-          !!(window as any).electronAPI ||
-          !!(window as any).require ||
-          navigator.userAgent.toLowerCase().includes('electron')
-        );
-      }
-      return false;
-    };
+  // Check if running in Electron (one-time check)
+  const isElectron = (() => {
+    if (typeof window !== 'undefined') {
+      const electronWindow = window as Window & {
+        electronAPI?: unknown;
+        require?: unknown;
+      };
+      return (
+        !!electronWindow.electronAPI ||
+        !!electronWindow.require ||
+        navigator.userAgent.toLowerCase().includes('electron')
+      );
+    }
+    return false;
+  })();
 
-    setIsElectron(checkElectron());
-  }, []);
+  const handleSeeDemo = () => {
+    setShowDemo(true);
+  };
 
-  // Show appropriate interface based on environment
-  return isElectron ? <WelcomeScreen /> : <MarketingHomepage />;
+  const handleWelcomeComplete = (name: string) => {
+    setUserName(name);
+  };
+
+  // Show appropriate interface based on environment and state
+  if (isElectron) {
+    if (userName) {
+      return <Dashboard userName={userName} />;
+    }
+    return <WelcomeScreen onComplete={handleWelcomeComplete} />;
+  }
+
+  if (showDemo) {
+    if (userName) {
+      return <Dashboard userName={userName} />;
+    }
+    return <WelcomeScreen onComplete={handleWelcomeComplete} />;
+  }
+
+  return <MarketingHomepage onSeeDemo={handleSeeDemo} />;
 }
