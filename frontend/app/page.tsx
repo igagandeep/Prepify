@@ -237,7 +237,7 @@ function Dashboard({ userName }: { userName: string }) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b px-6 py-4">
+      <header className="bg-white border-b-2 border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Prepify</h1>
           <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -261,7 +261,7 @@ function Dashboard({ userName }: { userName: string }) {
 
         {/* Quick Actions */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow cursor-pointer">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 hover:border-gray-300 transition-all cursor-pointer">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Plus className="w-5 h-5 text-blue-600" />
@@ -275,7 +275,7 @@ function Dashboard({ userName }: { userName: string }) {
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow cursor-pointer">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 hover:border-gray-300 transition-all cursor-pointer">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                 <FileText className="w-5 h-5 text-green-600" />
@@ -285,7 +285,7 @@ function Dashboard({ userName }: { userName: string }) {
             <p className="text-gray-600 text-sm">Get insights on your resume</p>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-shadow cursor-pointer">
+          <div className="bg-white p-6 rounded-lg border border-gray-200 hover:border-gray-300 transition-all cursor-pointer">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                 <MessageCircle className="w-5 h-5 text-purple-600" />
@@ -301,7 +301,7 @@ function Dashboard({ userName }: { userName: string }) {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h3 className="font-semibold text-gray-900 mb-4">Recent Activity</h3>
           <div className="text-center py-8 text-gray-500">
             <Briefcase className="w-12 h-12 mx-auto mb-3 text-gray-300" />

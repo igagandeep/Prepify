@@ -11,7 +11,8 @@
     "dist": "npm run build:prod && npm run dist --workspace=electron",
     "dist:win": "npm run build:prod && npm run dist:win --workspace=electron",
     "pack": "npm run build:prod && npm run pack --workspace=electron",
-    "test:build": "npm run build:prod && echo 'Build completed successfully!'"
+    "test:build": "npm run build:prod && echo 'Build completed successfully!'",
+    "clean": "npm run clean --workspace=backend --if-present && npm run clean --workspace=frontend --if-present && npm run clean --workspace=electron --if-present"
   },
   "workspaces": [
     "frontend",
@@ -19,7 +20,8 @@
     "electron"
   ],
   "devDependencies": {
-    "concurrently": "^8.0.0"
+    "concurrently": "^8.0.0",
+    "rimraf": "^5.0.0"
   },
   "repository": {
     "type": "git",
