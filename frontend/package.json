@@ -5,12 +5,15 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "export": "next build",
     "start": "next start",
+    "clean": "rimraf .next out",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "lucide-react": "^0.460.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
