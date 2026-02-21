@@ -43,6 +43,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
+      webSecurity: false, // Allow loading local CSS/JS files
     },
     autoHideMenuBar: true,
   });
@@ -52,7 +53,26 @@ function createWindow() {
   if (isDev) {
     win.loadURL('http://localhost:3000');
   } else {
-    win.loadFile(path.join(process.resourcesPath, 'frontend', 'index.html'));
+    // Load the exported Next.js app
+    const frontendPath = path.join(
+      process.resourcesPath,
+      'frontend',
+      'index.html',
+    );
+    console.log('Loading frontend from:', frontendPath);
+
+    // Check if file exists
+    if (fs.existsSync(frontendPath)) {
+      win.loadFile(frontendPath);
+    } else {
+      console.error('Frontend index.html not found at:', frontendPath);
+      // Fallback: load a simple error page
+      win.loadURL(
+        'data:text/html,<h1>Frontend not found</h1><p>Path: ' +
+          frontendPath +
+          '</p>',
+      );
+    }
   }
 }
 
