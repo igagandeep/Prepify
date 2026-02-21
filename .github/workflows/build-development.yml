@@ -11,6 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
 
@@ -24,12 +25,24 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Clear npm cache
+        run: npm cache clean --force
+
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
-        timeout-minutes: 15
+        run: |
+          npm ci --legacy-peer-deps --no-audit --no-fund
+        timeout-minutes: 20
+
+      - name: Install rimraf globally
+        run: npm install -g rimraf
 
       - name: Clean previous builds
-        run: npm run clean
+        run: |
+          rimraf backend/dist || echo "Backend dist not found"
+          rimraf frontend/out || echo "Frontend out not found" 
+          rimraf frontend/.next || echo "Frontend .next not found"
+          rimraf electron/dist || echo "Electron dist not found"
+          rimraf electron/dist-electron || echo "Electron dist-electron not found"
         continue-on-error: true
 
       - name: Build backend
@@ -40,28 +53,43 @@ jobs:
         run: npm run export --workspace=frontend
         timeout-minutes: 15
 
-      - name: Verify build outputs
+      - name: Verify build outputs (Windows)
+        if: runner.os == 'Windows'
         run: |
           echo "Backend dist contents:"
-          ls -la backend/dist/ || echo "Backend dist not found"
+          dir backend\dist 2>nul || echo "Backend dist not found"
           echo "Frontend out contents:"
-          ls -la frontend/out/ || echo "Frontend out not found"
+          dir frontend\out 2>nul || echo "Frontend out not found"
           echo "Electron dist contents:"
-          ls -la electron/dist/ || echo "Electron dist not found"
+          dir electron\dist 2>nul || echo "Electron dist not found"
+
+      - name: Verify build outputs (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          echo "Backend dist contents:"
+          ls -la backend/dist/ 2>/dev/null || echo "Backend dist not found"
+          echo "Frontend out contents:"
+          ls -la frontend/out/ 2>/dev/null || echo "Frontend out not found"
+          echo "Electron dist contents:"
+          ls -la electron/dist/ 2>/dev/null || echo "Electron dist not found"
 
       - name: Build electron
         run: npm run build --workspace=electron
         timeout-minutes: 5
 
       - name: Cache electron binaries
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
-          path: ~/.cache/electron
+          path: |
+            ~/.cache/electron
+            ~/.cache/electron-builder
           key: ${{ runner.os }}-electron-${{ hashFiles('electron/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-electron-
 
       - name: Package electron app
         run: npm run dist --workspace=electron
-        timeout-minutes: 30
+        timeout-minutes: 45
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: '--max-old-space-size=4096'
@@ -77,7 +105,7 @@ jobs:
           retention-days: 7
 
       - name: Upload to development release
-        if: github.ref == 'refs/heads/development' && matrix.os == 'windows-latest' && success()
+        if: github.ref == 'refs/heads/development' && matrix.os == 'Windows' && success()
         uses: softprops/action-gh-release@v1
         with:
           tag_name: dev-${{ github.sha }}
