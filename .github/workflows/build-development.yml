@@ -1,0 +1,66 @@
+name: Build Development
+
+on:
+  push:
+    branches: [development]
+  pull_request:
+    branches: [development]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build backend
+        run: npm run build --workspace=backend
+
+      - name: Build frontend for production
+        run: npm run export --workspace=frontend
+
+      - name: Build electron
+        run: npm run build --workspace=electron
+
+      - name: Package electron app
+        run: npm run dist --workspace=electron
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: prepify-${{ matrix.os }}-${{ github.sha }}
+          path: electron/dist-electron/
+          retention-days: 7
+
+      - name: Upload to development release
+        if: github.ref == 'refs/heads/development' && matrix.os == 'windows-latest'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: dev-${{ github.sha }}
+          name: Development Build ${{ github.sha }}
+          body: |
+            Automated development build from commit ${{ github.sha }}
+
+            **Changes:**
+            ${{ github.event.head_commit.message }}
+
+            **Note:** This is a development build for testing purposes.
+          files: electron/dist-electron/*.exe
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
