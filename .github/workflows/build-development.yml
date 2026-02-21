@@ -26,16 +26,33 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Build backend
-        run: npm run build --workspace=backend
+        run: |
+          cd backend
+          npm run build
 
       - name: Build frontend
-        run: npm run export --workspace=frontend
+        run: |
+          cd frontend
+          npm run export
 
       - name: Build electron
-        run: npm run build --workspace=electron
+        run: |
+          cd electron
+          npm run build
+
+      - name: Verify builds exist
+        run: |
+          echo "Checking backend build..."
+          ls backend/dist/ || echo "Backend dist missing"
+          echo "Checking frontend build..."
+          ls frontend/out/ || echo "Frontend out missing"
+          echo "Checking electron build..."
+          ls electron/dist/ || echo "Electron dist missing"
 
       - name: Package electron app
-        run: npm run dist --workspace=electron
+        run: |
+          cd electron
+          npm run dist
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

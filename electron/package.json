@@ -31,33 +31,20 @@
       "output": "dist-electron"
     },
     "files": [
-      "dist/**/*",
-      "node_modules/**/*"
+      "dist/**/*"
     ],
     "extraResources": [
       {
         "from": "../backend/dist",
-        "to": "backend",
-        "filter": [
-          "**/*"
-        ]
+        "to": "backend"
       },
       {
         "from": "../frontend/out",
-        "to": "frontend",
-        "filter": [
-          "**/*"
-        ]
+        "to": "frontend"
       }
     ],
     "win": {
       "target": "nsis"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
     },
     "mac": {
       "target": "dmg"
