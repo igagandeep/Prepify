@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/main.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/igagandeep/Prepify.git"
+  },
   "scripts": {
     "build": "tsc",
     "start": "electron dist/main.js",
@@ -42,6 +46,7 @@
         "to": "frontend"
       }
     ],
+    "publish": null,
     "win": {
       "target": "portable"
     },
