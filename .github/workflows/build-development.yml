@@ -7,10 +7,16 @@ on:
     branches: [development]
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -18,16 +24,39 @@ jobs:
       - name: Install dependencies
         run: npm install --legacy-peer-deps
 
-      - name: Build electron only
+      - name: Build backend
+        run: |
+          cd backend
+          npm run build
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run export
+
+      - name: Build electron
         run: |
           cd electron
           npm run build
+
+      - name: Verify all builds exist
+        shell: bash
+        run: |
+          echo "Checking builds..."
+          ls -la backend/dist/ || echo "❌ Backend dist missing"
+          ls -la frontend/out/ || echo "❌ Frontend out missing"  
+          ls -la electron/dist/ || echo "❌ Electron dist missing"
+          echo "✅ Build verification complete"
+
+      - name: Package electron app
+        run: |
+          cd electron
           npm run dist
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload Windows build
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: prepify-windows
+          name: prepify-${{ matrix.os }}
           path: electron/dist-electron/

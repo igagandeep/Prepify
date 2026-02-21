@@ -32,6 +32,16 @@
     "files": [
       "dist/**/*"
     ],
+    "extraResources": [
+      {
+        "from": "../backend/dist",
+        "to": "backend"
+      },
+      {
+        "from": "../frontend/out",
+        "to": "frontend"
+      }
+    ],
     "win": {
       "target": "portable"
     },
