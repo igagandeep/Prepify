@@ -51,6 +51,11 @@ if exist "%APP_DIR%\.git" (
 echo [INFO] Working directory: %CD%
 echo.
 
+:: Kill any running Node processes (prevents Prisma DLL lock errors on re-run)
+echo [INFO] Stopping any running Node processes...
+taskkill /F /IM node.exe /T >nul 2>&1
+echo [OK] Done.
+
 :: Install dependencies
 echo [INFO] Installing dependencies ^(this may take a few minutes^)...
 call npm install --legacy-peer-deps
