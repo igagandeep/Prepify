@@ -1,21 +1,23 @@
 import express from 'express';
 import cors from 'cors';
-import { PrismaClient } from '@prisma/client';
+import prisma from './lib/prisma';
+import jobsRouter from './routes/jobs.routes';
 
 const app = express();
 const PORT = 3001;
-const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
 
-// Health check endpoint
-app.get('/health', async (_req: express.Request, res: express.Response) => {
+// Routes
+app.use('/api/jobs', jobsRouter);
+
+// Health check
+app.get('/health', async (_req, res) => {
   try {
-    // Test database connection
     await prisma.$connect();
     res.json({ status: 'ok', database: 'connected' });
-  } catch (error) {
+  } catch {
     res.status(500).json({ status: 'error', database: 'disconnected' });
   }
 });
