@@ -9,13 +9,16 @@
   },
   "scripts": {
     "build": "tsc",
+    "build:all": "npm run build:backend && npm run build:frontend && npm run build",
+    "build:backend": "cd ../backend && npm run build",
+    "build:frontend": "cd ../frontend && npm run build",
     "start": "electron dist/main.js",
     "dev": "tsc && electron dist/main.js",
     "clean": "rimraf dist dist-electron",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder",
-    "dist:win": "electron-builder --win",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pack": "npm run build:all && electron-builder --dir",
+    "dist": "npm run build:all && electron-builder",
+    "dist:win": "npm run build:all && electron-builder --win",
+    "test": "node ../scripts/test-backend.js"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +28,7 @@
     "@types/node": "^20.0.0",
     "electron": "^28.0.0",
     "electron-builder": "^26.8.1",
+    "rimraf": "^6.0.1",
     "typescript": "^5.0.0"
   },
   "build": {
@@ -39,13 +43,26 @@
     "extraResources": [
       {
         "from": "../backend/dist",
-        "to": "backend"
+        "to": "backend/dist"
+      },
+      {
+        "from": "../backend/node_modules",
+        "to": "backend/node_modules"
+      },
+      {
+        "from": "../backend/package.json",
+        "to": "backend/package.json"
+      },
+      {
+        "from": "../backend/prisma",
+        "to": "backend/prisma"
       },
       {
         "from": "../frontend/out",
         "to": "frontend"
       }
     ],
+    "beforeBuild": null,
     "publish": null,
     "win": {
       "target": "nsis"

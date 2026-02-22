@@ -8,12 +8,14 @@ yarn-error.log*
 # Build outputs
 dist/
 dist-electron/
+dist-electron-new/
 build/
 out/
 *.tsbuildinfo
 
 # Electron distribution files
 electron/dist-electron/
+electron/dist-electron-new/
 
 # Next.js
 .next/
