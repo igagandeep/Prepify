@@ -6,7 +6,7 @@ echo              Prepify Setup
 echo ============================================
 echo.
 
-:: ── Check Node.js ───────────────────────────
+:: Check Node.js
 node --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] Node.js is not installed.
@@ -15,8 +15,9 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
+echo [OK] Node.js found.
 
-:: ── Check Git ───────────────────────────────
+:: Check Git
 git --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] Git is not installed.
@@ -25,11 +26,13 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
+echo [OK] Git found.
 
-:: ── Clone or update ─────────────────────────
+:: Clone or update
 set REPO_URL=https://github.com/igagandeep/Prepify.git
 set APP_DIR=%USERPROFILE%\Prepify
 
+echo.
 if exist "%APP_DIR%\.git" (
     echo [INFO] Prepify already exists. Pulling latest changes...
     cd /d "%APP_DIR%"
@@ -45,47 +48,56 @@ if exist "%APP_DIR%\.git" (
     cd /d "%APP_DIR%"
 )
 
-:: ── Install dependencies ─────────────────────
+echo [INFO] Working directory: %CD%
 echo.
-echo [INFO] Installing dependencies...
-npm install --legacy-peer-deps
+
+:: Install dependencies
+echo [INFO] Installing dependencies ^(this may take a few minutes^)...
+call npm install --legacy-peer-deps
 if %errorlevel% neq 0 (
-    echo [ERROR] Dependency installation failed.
+    echo.
+    echo [ERROR] Dependency installation failed. See errors above.
     pause
     exit /b 1
 )
+echo [OK] Dependencies installed.
 
-:: ── Backend .env ─────────────────────────────
+:: Create backend .env if missing
 if not exist "backend\.env" (
     echo [INFO] Creating backend environment file...
     (
         echo DATABASE_URL=file:./prepify.db
         echo NODE_ENV=development
     ) > backend\.env
+    echo [OK] backend\.env created.
 )
 
-:: ── Database setup ───────────────────────────
+:: Setup database
 echo.
 echo [INFO] Setting up database...
-cd backend
-npx prisma db push
+cd /d "%APP_DIR%\backend"
+call npm run db:push
 if %errorlevel% neq 0 (
-    echo [ERROR] Database setup failed.
-    cd ..
+    echo.
+    echo [ERROR] Database setup failed. See errors above.
+    cd /d "%APP_DIR%"
     pause
     exit /b 1
 )
-cd ..
+cd /d "%APP_DIR%"
+echo [OK] Database ready.
 
-:: ── Launch ───────────────────────────────────
+:: Launch
 echo.
 echo ============================================
 echo   Prepify is starting!
-echo.
-echo   Frontend → http://localhost:3000
-echo   Backend  → http://localhost:3001
-echo.
+echo   Frontend -^> http://localhost:3000
+echo   Backend  -^> http://localhost:3001
 echo   Press Ctrl+C to stop.
 echo ============================================
 echo.
-npm run dev
+call npm run dev
+
+echo.
+echo [INFO] Prepify stopped.
+pause
