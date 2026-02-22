@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Trash2, X } from 'lucide-react';
 import {
   useJobs,
@@ -66,6 +66,13 @@ export default function JobTracking() {
   function closeModal() {
     setShowModal(false);
   }
+
+  useEffect(() => {
+    if (!showModal) return;
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') closeModal(); };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [showModal]);
 
   function handleAdd() {
     if (!canSubmit) return;
@@ -207,6 +214,7 @@ export default function JobTracking() {
                       <button
                         onClick={() => handleDelete(job.id)}
                         disabled={deleteJob.isPending}
+                        aria-label={`Delete ${job.company} – ${job.role}`}
                         className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-40"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -221,18 +229,24 @@ export default function JobTracking() {
       )}
 
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+        >
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={closeModal}
           />
           <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h2 id="modal-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                 Add Application
               </h2>
               <button
                 onClick={closeModal}
+                aria-label="Close modal"
                 className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 <X className="w-4 h-4" />
@@ -243,8 +257,10 @@ export default function JobTracking() {
               {FORM_FIELDS.map(({ key, placeholder }) => (
                 <input
                   key={key}
+                  id={`field-${key}`}
                   type="text"
                   placeholder={placeholder}
+                  aria-label={placeholder}
                   value={form[key]}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, [key]: e.target.value }))

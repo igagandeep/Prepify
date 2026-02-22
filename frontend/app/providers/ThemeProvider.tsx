@@ -26,8 +26,10 @@ export default function ThemeProvider({
   const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
-    const saved = localStorage.getItem('prepify_theme') as Theme | null;
-    const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches
+    const savedRaw = localStorage.getItem('prepify_theme');
+    const saved: Theme | null =
+      savedRaw === 'dark' || savedRaw === 'light' ? savedRaw : null;
+    const preferred: Theme = window.matchMedia('(prefers-color-scheme: dark)').matches
       ? 'dark'
       : 'light';
     const initial = saved ?? preferred;
@@ -36,10 +38,12 @@ export default function ThemeProvider({
   }, []);
 
   const toggleTheme = () => {
-    const next = theme === 'light' ? 'dark' : 'light';
-    setTheme(next);
-    localStorage.setItem('prepify_theme', next);
-    document.documentElement.classList.toggle('dark', next === 'dark');
+    setTheme((prev) => {
+      const next: Theme = prev === 'light' ? 'dark' : 'light';
+      localStorage.setItem('prepify_theme', next);
+      document.documentElement.classList.toggle('dark', next === 'dark');
+      return next;
+    });
   };
 
   return (
