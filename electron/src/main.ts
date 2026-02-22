@@ -1,39 +1,71 @@
 import { app, BrowserWindow } from 'electron';
-import { spawn } from 'child_process';
+import { spawn, ChildProcess } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 
-let backendProcess: any;
+let backendProcess: ChildProcess | null = null;
 
 function startBackend() {
-  console.log('Starting backend server...');
-
   const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
-  const backendPath = isDev
-    ? path.join(__dirname, '../../backend/dist/index.js')
-    : path.join(process.resourcesPath, 'backend', 'index.js');
 
-  // Check if backend file exists
-  if (!fs.existsSync(backendPath)) {
-    console.log('Backend not built yet, skipping backend start in development');
+  if (isDev) {
+    // In development, just skip starting backend - user runs it manually
+    console.log('Development mode - backend should be started manually');
     return;
   }
 
-  backendProcess = spawn('node', [backendPath], {
-    stdio: 'pipe',
-  });
+  // In production, start the backend using spawn
+  const backendPath = path.join(
+    process.resourcesPath,
+    'backend',
+    'dist',
+    'index.js',
+  );
 
-  backendProcess.stdout.on('data', (data: any) => {
-    console.log(`Backend: ${data}`);
-  });
+  if (!fs.existsSync(backendPath)) {
+    console.error(`Backend not found at: ${backendPath}`);
+    return;
+  }
 
-  backendProcess.stderr.on('data', (data: any) => {
-    console.error(`Backend Error: ${data}`);
-  });
+  // Set up database in user data directory
+  const userDataPath = app.getPath('userData');
+  const dbPath = path.join(userDataPath, 'prepify.db');
 
-  backendProcess.on('close', (code: any) => {
-    console.log(`Backend process exited with code ${code}`);
-  });
+  try {
+    // Use spawn instead of utilityProcess.fork for better module resolution
+    backendProcess = spawn('node', [backendPath], {
+      cwd: path.join(process.resourcesPath, 'backend'),
+      env: {
+        ...process.env,
+        DATABASE_URL: `file:${dbPath}`,
+        NODE_ENV: 'production',
+        NODE_PATH: path.join(process.resourcesPath, 'backend', 'node_modules'),
+      },
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+
+    backendProcess.stdout?.on('data', (data: Buffer) => {
+      console.log(`Backend: ${data.toString().trim()}`);
+    });
+
+    backendProcess.stderr?.on('data', (data: Buffer) => {
+      console.error(`Backend Error: ${data.toString().trim()}`);
+    });
+
+    backendProcess.on('exit', (code: number | null) => {
+      console.log(`Backend exited with code ${code}`);
+      backendProcess = null;
+    });
+
+    backendProcess.on('error', (err: Error) => {
+      console.error('Failed to start backend process:', err);
+      backendProcess = null;
+    });
+
+    console.log('Backend started successfully');
+  } catch (err) {
+    console.error('Failed to start backend:', err);
+  }
 }
 
 function createWindow() {
@@ -43,7 +75,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      webSecurity: false, // Allow loading local CSS/JS files
+      webSecurity: false,
     },
     autoHideMenuBar: true,
   });
@@ -53,36 +85,30 @@ function createWindow() {
   if (isDev) {
     win.loadURL('http://localhost:3000');
   } else {
-    // Load the exported Next.js app
     const frontendPath = path.join(
       process.resourcesPath,
       'frontend',
       'index.html',
     );
-    console.log('Loading frontend from:', frontendPath);
-
-    // Check if file exists
     if (fs.existsSync(frontendPath)) {
       win.loadFile(frontendPath);
     } else {
-      console.error('Frontend index.html not found at:', frontendPath);
-      // Fallback: load a simple error page
-      win.loadURL(
-        'data:text/html,<h1>Frontend not found</h1><p>Path: ' +
-          frontendPath +
-          '</p>',
-      );
+      win.loadURL('data:text/html,<h1>Frontend not found</h1>');
     }
   }
 }
 
 app.whenReady().then(() => {
   startBackend();
-  createWindow();
+  setTimeout(() => {
+    createWindow();
+  }, 2000);
 });
 
 app.on('before-quit', () => {
-  backendProcess?.kill();
+  if (backendProcess) {
+    backendProcess.kill('SIGTERM');
+  }
 });
 
 app.on('window-all-closed', () => {
