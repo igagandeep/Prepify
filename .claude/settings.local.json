@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh issue:*)",
+      "Bash(where:*)",
+      "Bash(winget list:*)",
+      "Bash(npm install:*)",
+      "Bash(d:/Prepify/frontend/app/globals.css:*)",
+      "Bash(node:*)"
+    ]
+  }
+}

@@ -13,6 +13,8 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.21",
+    "axios": "^1.13.5",
     "lucide-react": "^0.460.0",
     "next": "16.1.6",
     "react": "19.2.3",

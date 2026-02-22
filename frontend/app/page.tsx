@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Briefcase,
   FileText,
@@ -10,15 +10,14 @@ import {
   Eye,
   Download,
   Globe,
-  User,
-  Plus,
 } from 'lucide-react';
+import AppLayout from './components/AppLayout';
 
-// Marketing Homepage Component (for web/hosted version)
+// Marketing Homepage (web/hosted version)
 function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="bg-gradient-to-br from-slate-800 to-slate-900 text-white py-20 px-8">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl font-bold mb-6">Prepify</h1>
@@ -73,14 +72,13 @@ function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features */}
       <section className="py-20 px-8 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-16 text-gray-900">
             Everything you need to land the job
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Job Tracking */}
             <div className="bg-white p-8 rounded-lg shadow-sm border text-center">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Briefcase className="w-6 h-6 text-blue-600" />
@@ -93,8 +91,6 @@ function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
                 organized view.
               </p>
             </div>
-
-            {/* Resume Analysis */}
             <div className="bg-white p-8 rounded-lg shadow-sm border text-center">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <FileText className="w-6 h-6 text-blue-600" />
@@ -107,8 +103,6 @@ function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
                 improve.
               </p>
             </div>
-
-            {/* AI Mock Interviews */}
             <div className="bg-white p-8 rounded-lg shadow-sm border text-center">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <MessageCircle className="w-6 h-6 text-blue-600" />
@@ -125,7 +119,7 @@ function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
         </div>
       </section>
 
-      {/* Purpose Section */}
+      {/* Purpose */}
       <section className="py-20 px-8 bg-slate-800">
         <div className="max-w-4xl mx-auto text-center">
           <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -161,21 +155,18 @@ function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
   );
 }
 
-// Welcome Screen Component (for local Electron app)
+// Welcome Screen (first-time setup)
 function WelcomeScreen({ onComplete }: { onComplete: (name: string) => void }) {
   const [name, setName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) {
-      onComplete(name.trim());
-    }
+    if (name.trim()) onComplete(name.trim());
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white rounded-lg shadow-sm border p-8 w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-6">
           <div
             className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4"
@@ -186,12 +177,9 @@ function WelcomeScreen({ onComplete }: { onComplete: (name: string) => void }) {
           <h1 className="text-2xl font-semibold text-gray-900 mb-2">
             Welcome to Prepify
           </h1>
-          <p className="text-gray-600 text-sm">
-            Enter your name to get started
-          </p>
+          <p className="text-gray-600 text-sm">Enter your name to get started</p>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <input
@@ -199,19 +187,18 @@ function WelcomeScreen({ onComplete }: { onComplete: (name: string) => void }) {
               placeholder="Your name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent placeholder-gray-500 text-gray-900"
-              style={{ '--tw-ring-color': '#3948CF' } as React.CSSProperties}
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none placeholder-gray-500 text-gray-900"
               onFocus={(e) =>
                 (e.currentTarget.style.boxShadow = '0 0 0 2px #3948CF40')
               }
               onBlur={(e) => (e.currentTarget.style.boxShadow = 'none')}
+              autoFocus
               required
             />
             <p className="text-xs text-gray-500 mt-2">
               This name will be used locally
             </p>
           </div>
-
           <button
             type="submit"
             className="w-full text-white py-3 px-4 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
@@ -223,8 +210,7 @@ function WelcomeScreen({ onComplete }: { onComplete: (name: string) => void }) {
               (e.currentTarget.style.backgroundColor = '#3948CF')
             }
           >
-            Next
-            <span>→</span>
+            Get Started →
           </button>
         </form>
       </div>
@@ -232,132 +218,33 @@ function WelcomeScreen({ onComplete }: { onComplete: (name: string) => void }) {
   );
 }
 
-// Dashboard Component
-function Dashboard({ userName }: { userName: string }) {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b-2 border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Prepify</h1>
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <User className="w-4 h-4" />
-            Welcome, {userName}!
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome to Prepify, {userName}
-          </h2>
-          <p className="text-gray-600">
-            Your personal job search companion. Let&apos;s get started with
-            tracking your applications.
-          </p>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg border border-gray-200 hover:border-gray-300 transition-all cursor-pointer">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Plus className="w-5 h-5 text-blue-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900">
-                Add Job Application
-              </h3>
-            </div>
-            <p className="text-gray-600 text-sm">
-              Start tracking a new job opportunity
-            </p>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg border border-gray-200 hover:border-gray-300 transition-all cursor-pointer">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <FileText className="w-5 h-5 text-green-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900">Analyze Resume</h3>
-            </div>
-            <p className="text-gray-600 text-sm">Get insights on your resume</p>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg border border-gray-200 hover:border-gray-300 transition-all cursor-pointer">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-purple-600" />
-              </div>
-              <h3 className="font-semibold text-gray-900">
-                Practice Interview
-              </h3>
-            </div>
-            <p className="text-gray-600 text-sm">
-              Start a mock interview session
-            </p>
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="font-semibold text-gray-900 mb-4">Recent Activity</h3>
-          <div className="text-center py-8 text-gray-500">
-            <Briefcase className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p>
-              No applications yet. Add your first job application to get
-              started!
-            </p>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
-
 export default function Home() {
   const [showDemo, setShowDemo] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  // Check if running in Electron (one-time check)
-  const isElectron = (() => {
-    if (typeof window !== 'undefined') {
-      const electronWindow = window as Window & {
-        electronAPI?: unknown;
-        require?: unknown;
-      };
-      return (
-        !!electronWindow.electronAPI ||
-        !!electronWindow.require ||
-        navigator.userAgent.toLowerCase().includes('electron')
-      );
-    }
-    return false;
-  })();
+  useEffect(() => {
+    const saved = localStorage.getItem('prepify_username');
+    setUserName(saved);
+    setMounted(true);
+  }, []);
 
-  const handleSeeDemo = () => {
-    setShowDemo(true);
-  };
-
-  const handleWelcomeComplete = (name: string) => {
+  const saveUserName = (name: string) => {
+    localStorage.setItem('prepify_username', name);
     setUserName(name);
   };
 
-  // Show appropriate interface based on environment and state
-  if (isElectron) {
-    if (userName) {
-      return <Dashboard userName={userName} />;
-    }
-    return <WelcomeScreen onComplete={handleWelcomeComplete} />;
+  const isElectron =
+    typeof window !== 'undefined' &&
+    (navigator.userAgent.toLowerCase().includes('electron') ||
+      !!(window as Window & { electronAPI?: unknown }).electronAPI);
+
+  if (!mounted) return null;
+
+  if (isElectron || showDemo) {
+    if (userName) return <AppLayout userName={userName} />;
+    return <WelcomeScreen onComplete={saveUserName} />;
   }
 
-  if (showDemo) {
-    if (userName) {
-      return <Dashboard userName={userName} />;
-    }
-    return <WelcomeScreen onComplete={handleWelcomeComplete} />;
-  }
-
-  return <MarketingHomepage onSeeDemo={handleSeeDemo} />;
+  return <MarketingHomepage onSeeDemo={() => setShowDemo(true)} />;
 }

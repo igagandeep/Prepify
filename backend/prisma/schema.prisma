@@ -8,7 +8,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Simple User model - just username for now
 model User {
   id        String   @id @default(cuid())
   username  String   @unique
@@ -16,4 +15,17 @@ model User {
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+model JobApplication {
+  id        String   @id @default(cuid())
+  company   String
+  role      String
+  status    String   @default("Applied")
+  notes     String   @default("")
+  appliedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("job_applications")
 }
