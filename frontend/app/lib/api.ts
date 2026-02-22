@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'https://prepify-backend-mu.vercel.app';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -13,6 +12,9 @@ export interface Job {
   company: string;
   role: string;
   status: string;
+  location: string;
+  salary: string;
+  jobUrl: string;
   notes: string;
   appliedAt: string;
   createdAt: string;
@@ -23,7 +25,10 @@ export interface CreateJobInput {
   company: string;
   role: string;
   status: string;
-  notes: string;
+  location?: string;
+  salary?: string;
+  jobUrl?: string;
+  notes?: string;
 }
 
 export interface UpdateJobInput {

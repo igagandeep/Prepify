@@ -19,7 +19,7 @@ export const getAllJobs = async (_req: Request, res: Response) => {
 
 export const createJob = async (req: Request, res: Response) => {
   try {
-    const { company, role, status, notes } = req.body;
+    const { company, role, status, location, salary, jobUrl, notes } = req.body;
 
     if (!company?.trim() || !role?.trim()) {
       res
@@ -28,12 +28,16 @@ export const createJob = async (req: Request, res: Response) => {
       return;
     }
 
-    const job = await prisma.jobApplication.create({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const job = await (prisma.jobApplication as any).create({
       data: {
         company: company.trim(),
         role: role.trim(),
         status: status || 'Applied',
-        notes: notes || '',
+        location: location?.trim() || '',
+        salary: salary?.trim() || '',
+        jobUrl: jobUrl?.trim() || '',
+        notes: notes?.trim() || '',
       },
     });
     res.status(201).json(job);
@@ -49,12 +53,15 @@ export const createJob = async (req: Request, res: Response) => {
 export const updateJob = async (req: Request, res: Response) => {
   try {
     const id = req.params.id as string;
-    const { company, role, status, notes } = req.body;
+    const { company, role, status, location, salary, jobUrl, notes } = req.body;
 
     const data: Prisma.JobApplicationUpdateInput = {};
     if (company !== undefined) data.company = company;
     if (role !== undefined) data.role = role;
     if (status !== undefined) data.status = status;
+    if (location !== undefined) (data as Record<string, unknown>).location = location;
+    if (salary !== undefined) (data as Record<string, unknown>).salary = salary;
+    if (jobUrl !== undefined) (data as Record<string, unknown>).jobUrl = jobUrl;
     if (notes !== undefined) data.notes = notes;
 
     const job = await prisma.jobApplication.update({

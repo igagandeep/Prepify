@@ -9,7 +9,14 @@
       "Bash(node:*)",
       "WebFetch(domain:registry.npmjs.org)",
       "WebFetch(domain:www.prisma.io)",
-      "WebFetch(domain:docs.turso.tech)"
+      "WebFetch(domain:docs.turso.tech)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run db:push:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout:*)",
+      "Bash(cmd /c \"taskkill /F /IM node.exe\")"
     ]
   }
 }

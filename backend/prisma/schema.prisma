@@ -22,6 +22,9 @@ model JobApplication {
   company   String
   role      String
   status    String   @default("Applied")
+  location  String   @default("")
+  salary    String   @default("")
+  jobUrl    String   @default("")
   notes     String   @default("")
   appliedAt DateTime @default(now())
   createdAt DateTime @default(now())
