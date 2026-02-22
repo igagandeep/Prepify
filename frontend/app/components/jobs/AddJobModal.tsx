@@ -1,30 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { z } from 'zod';
 import { Briefcase, MapPin, DollarSign, Link, FileText } from 'lucide-react';
 import Modal from '../ui/Modal';
-
-const STATUS_OPTIONS = ['Applied', 'Interview', 'Offer', 'Rejected'] as const;
-
-const jobSchema = z.object({
-  company: z.string().min(1, 'Company name is required'),
-  role: z.string().min(1, 'Role is required'),
-  status: z.enum(STATUS_OPTIONS),
-  location: z.string().optional(),
-  salary: z.string().optional(),
-  jobUrl: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || val === '' || /^https?:\/\/.+/.test(val),
-      'Must be a valid URL starting with http:// or https://'
-    ),
-  notes: z.string().optional(),
-});
-
-type JobFormData = z.infer<typeof jobSchema>;
-type FieldErrors = Partial<Record<keyof JobFormData, string>>;
+import { jobSchema, STATUS_OPTIONS } from '../../lib/validations/job';
+import type { JobFormData, FieldErrors } from '../../lib/validations/job';
 
 const EMPTY_FORM: JobFormData = {
   company: '',

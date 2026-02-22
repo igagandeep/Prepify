@@ -9,8 +9,6 @@ import {
   Heart,
   Github,
   Eye,
-  Download,
-  Globe,
 } from 'lucide-react';
 
 const isDemo = process.env.NEXT_PUBLIC_APP_MODE === 'demo';
@@ -26,7 +24,7 @@ function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
             Prepare smarter. Track better. Interview with confidence.
           </h2>
           <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Your open-source desktop companion for managing job applications,
+            Your open-source companion for managing job applications,
             analyzing resumes, and practicing interviews — all in one calm,
             focused space.
           </p>
@@ -39,30 +37,6 @@ function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
               <Eye className="w-5 h-5" />
               See Demo
             </button>
-            <div className="relative group">
-              <button
-                disabled
-                className="bg-slate-400 text-slate-200 px-8 py-3 rounded-lg font-semibold flex items-center gap-2 cursor-not-allowed opacity-60"
-              >
-                <Download className="w-5 h-5" />
-                Download App
-              </button>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Coming Soon
-              </div>
-            </div>
-            <div className="relative group">
-              <button
-                disabled
-                className="border-2 border-blue-300 text-blue-300 px-8 py-3 rounded-lg font-semibold flex items-center gap-2 cursor-not-allowed opacity-60"
-              >
-                <Globe className="w-5 h-5" />
-                Chrome Extension
-              </button>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                In Development
-              </div>
-            </div>
           </div>
         </div>
       </section>

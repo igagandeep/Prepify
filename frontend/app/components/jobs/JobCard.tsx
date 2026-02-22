@@ -2,7 +2,7 @@
 
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import type { Job } from '../../lib/api';
+import type { Job } from '../../types/job';
 import JobCardContent from './JobCardContent';
 
 interface JobCardProps {
