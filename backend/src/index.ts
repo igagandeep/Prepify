@@ -10,7 +10,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 30001;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      'http://localhost:3000',
+      'https://prepify-git-development-lappanpreps-projects.vercel.app',
+    ],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
 // Routes
@@ -19,12 +27,28 @@ app.use('/api/jobs', jobsRouter);
 // Health check
 app.get('/health', async (_req, res) => {
   try {
+    // Test database connection
     await prisma.$queryRaw`SELECT 1`;
-    res.json({ status: 'ok', database: 'connected' });
+    res.json({
+      status: 'ok',
+      database: 'connected',
+      env: process.env.NODE_ENV,
+    });
   } catch (err) {
     console.error('Health check failed:', err);
-    res.status(500).json({ status: 'error', database: 'disconnected' });
+    res.status(500).json({
+      status: 'error',
+      database: 'disconnected',
+      error: err instanceof Error ? err.message : 'Unknown error',
+      env: process.env.NODE_ENV,
+      databaseUrl: process.env.DATABASE_URL ? 'Set' : 'Not set',
+    });
   }
+});
+
+// Root endpoint for Vercel
+app.get('/', (_req, res) => {
+  res.json({ message: 'Prepify Backend API', status: 'running' });
 });
 
 // Graceful shutdown

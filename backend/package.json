@@ -19,6 +19,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@libsql/client": "^0.5.2",
+    "@prisma/adapter-libsql": "^6.0.0",
     "@prisma/client": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",

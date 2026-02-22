@@ -8,8 +8,12 @@ export const getAllJobs = async (_req: Request, res: Response) => {
       orderBy: { appliedAt: 'desc' },
     });
     res.json(jobs);
-  } catch {
-    res.status(500).json({ error: 'Failed to fetch jobs' });
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    res.status(500).json({
+      error: 'Failed to fetch jobs',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };
 
@@ -18,7 +22,9 @@ export const createJob = async (req: Request, res: Response) => {
     const { company, role, status, notes } = req.body;
 
     if (!company?.trim() || !role?.trim()) {
-      res.status(400).json({ error: 'Missing required fields: company and role' });
+      res
+        .status(400)
+        .json({ error: 'Missing required fields: company and role' });
       return;
     }
 
@@ -31,8 +37,12 @@ export const createJob = async (req: Request, res: Response) => {
       },
     });
     res.status(201).json(job);
-  } catch {
-    res.status(500).json({ error: 'Failed to create job' });
+  } catch (error) {
+    console.error('Error creating job:', error);
+    res.status(500).json({
+      error: 'Failed to create job',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 };
 
@@ -53,7 +63,10 @@ export const updateJob = async (req: Request, res: Response) => {
     });
     res.json(job);
   } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === 'P2025'
+    ) {
       res.status(404).json({ error: 'Job not found' });
       return;
     }
@@ -67,7 +80,10 @@ export const deleteJob = async (req: Request, res: Response) => {
     await prisma.jobApplication.delete({ where: { id } });
     res.json({ success: true });
   } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === 'P2025'
+    ) {
       res.status(404).json({ error: 'Job not found' });
       return;
     }
