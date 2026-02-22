@@ -15,9 +15,10 @@ app.use('/api/jobs', jobsRouter);
 // Health check
 app.get('/health', async (_req, res) => {
   try {
-    await prisma.$connect();
+    await prisma.$queryRaw`SELECT 1`;
     res.json({ status: 'ok', database: 'connected' });
-  } catch {
+  } catch (err) {
+    console.error('Health check failed:', err);
     res.status(500).json({ status: 'error', database: 'disconnected' });
   }
 });
@@ -28,4 +29,9 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-app.listen(PORT, () => console.log(`Backend running on ${PORT}`));
+// Only start a local server outside of Vercel serverless
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => console.log(`Backend running on ${PORT}`));
+}
+
+export default app;

@@ -41,7 +41,7 @@ function DashboardPage({
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <button
           onClick={() => onNavigate('jobTracking')}
           className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 text-left hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-sm transition-all"
@@ -149,7 +149,10 @@ export default function AppLayout({ userName }: { userName: string }) {
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="px-3 py-2 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
           <button
+            type="button"
             onClick={() => setSidebarOpen((v) => !v)}
+            aria-label="Toggle sidebar"
+            aria-expanded={sidebarOpen}
             className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <PanelLeft className="w-5 h-5" />

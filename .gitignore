@@ -36,6 +36,9 @@ electron/dist-electron/
 ehthumbs.db
 Thumbs.db
 
+# Claude local settings
+.claude/settings.local.json
+
 # IDE files
 .vscode/
 .idea/

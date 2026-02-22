@@ -224,13 +224,22 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem('prepify_username');
-    setUserName(saved);
-    setMounted(true);
+    try {
+      const saved = localStorage.getItem('prepify_username');
+      setUserName(saved);
+    } catch {
+      setUserName(null);
+    } finally {
+      setMounted(true);
+    }
   }, []);
 
   const saveUserName = (name: string) => {
-    localStorage.setItem('prepify_username', name);
+    try {
+      localStorage.setItem('prepify_username', name);
+    } catch (err) {
+      console.warn('Could not persist username:', err);
+    }
     setUserName(name);
   };
 
