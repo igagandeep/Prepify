@@ -9,6 +9,8 @@ import {
   Heart,
   Github,
   Eye,
+  Download,
+  Globe,
 } from 'lucide-react';
 
 const isDemo = process.env.NEXT_PUBLIC_APP_MODE === 'demo';
@@ -37,7 +39,28 @@ function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
               <Eye className="w-5 h-5" />
               See Demo
             </button>
+            <a
+              href="/setup.bat"
+              download="setup.bat"
+              className="bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
+            >
+              <Download className="w-5 h-5" />
+              Download for Windows
+            </a>
+            <div className="relative group">
+              <button
+                disabled
+                className="border-2 border-slate-500 text-slate-400 px-8 py-3 rounded-lg font-semibold flex items-center gap-2 cursor-not-allowed opacity-60"
+              >
+                <Globe className="w-5 h-5" />
+                Chrome Extension
+              </button>
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                Coming Soon
+              </div>
+            </div>
           </div>
+          <p className="mt-4 text-slate-400 text-sm">Windows only · Requires Node.js &amp; Git</p>
         </div>
       </section>
 
