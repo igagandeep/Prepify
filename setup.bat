@@ -84,8 +84,21 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
-cd /d "%APP_DIR%"
 echo [OK] Database ready.
+
+:: Build backend
+echo.
+echo [INFO] Building backend...
+call npm run build
+if %errorlevel% neq 0 (
+    echo.
+    echo [ERROR] Backend build failed. See errors above.
+    cd /d "%APP_DIR%"
+    pause
+    exit /b 1
+)
+cd /d "%APP_DIR%"
+echo [OK] Backend built.
 
 :: Launch
 echo.
