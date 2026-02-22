@@ -6,7 +6,10 @@
       "Bash(winget list:*)",
       "Bash(npm install:*)",
       "Bash(d:/Prepify/frontend/app/globals.css:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "WebFetch(domain:registry.npmjs.org)",
+      "WebFetch(domain:www.prisma.io)",
+      "WebFetch(domain:docs.turso.tech)"
     ]
   }
 }
