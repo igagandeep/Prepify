@@ -8,12 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest]
-        # os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -33,36 +28,4 @@ jobs:
       - name: Build frontend
         run: |
           cd frontend
-          npm run export
-
-      - name: Build electron
-        run: |
-          cd electron
           npm run build
-
-      - name: Verify builds exist
-        run: |
-          echo "Checking builds..."
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            if [ -d "backend/dist" ]; then echo "✅ Backend dist exists"; else echo "❌ Backend dist missing"; fi
-            if [ -d "frontend/out" ]; then echo "✅ Frontend out exists"; else echo "❌ Frontend out missing"; fi
-            if [ -d "electron/dist" ]; then echo "✅ Electron dist exists"; else echo "❌ Electron dist missing"; fi
-          else
-            ls -la backend/dist/ || echo "❌ Backend dist missing"
-            ls -la frontend/out/ || echo "❌ Frontend out missing"  
-            ls -la electron/dist/ || echo "❌ Electron dist missing"
-          fi
-        shell: bash
-
-      - name: Package electron app
-        run: |
-          cd electron
-          npm run dist
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: prepify-${{ matrix.os }}
-          path: electron/dist-electron/

@@ -10,15 +10,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 30001;
 
-app.use(
-  cors({
-    origin: [
-      'http://localhost:3000',
-      'https://prepify-git-development-igagandeeps-projects.vercel.app',
-    ],
-    credentials: true,
-  }),
-);
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['http://localhost:3000'];
+
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 
 // Routes

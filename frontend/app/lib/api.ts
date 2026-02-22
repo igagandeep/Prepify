@@ -1,12 +1,7 @@
 import axios from 'axios';
 
-const isElectron =
-  typeof window !== 'undefined' &&
-  navigator.userAgent.toLowerCase().includes('electron');
-
-const BASE_URL = isElectron
-  ? 'http://localhost:3001'
-  : 'https://prepify-backend-mu.vercel.app';
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || 'https://prepify-backend-mu.vercel.app';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
