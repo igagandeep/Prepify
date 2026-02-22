@@ -14,7 +14,7 @@ app.use(
   cors({
     origin: [
       'http://localhost:3000',
-      'https://prepify-git-development-lappanpreps-projects.vercel.app',
+      'https://prepify-git-development-igagandeeps-projects.vercel.app',
     ],
     credentials: true,
   }),
