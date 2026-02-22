@@ -1,19 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Briefcase, FileText, MessageCircle, Plus } from 'lucide-react';
 
 export default function DashboardPage() {
-  const [userName, setUserName] = useState('');
-
-  useEffect(() => {
+  const [userName] = useState(() => {
     try {
-      setUserName(localStorage.getItem('prepify_username') ?? '');
+      return localStorage.getItem('prepify_username') ?? '';
     } catch {
-      setUserName('');
+      return '';
     }
-  }, []);
+  });
 
   return (
     <div>
@@ -37,7 +35,9 @@ export default function DashboardPage() {
           >
             <Briefcase className="w-5 h-5" style={{ color: '#3948CF' }} />
           </div>
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Job Tracking</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+            Job Tracking
+          </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Track applications, statuses, and follow-ups.
           </p>
@@ -54,7 +54,9 @@ export default function DashboardPage() {
           <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4 bg-gray-100 dark:bg-gray-700">
             <FileText className="w-5 h-5 text-gray-400" />
           </div>
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Resume Analysis</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+            Resume Analysis
+          </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Compare your resume against job descriptions.
           </p>
@@ -65,7 +67,9 @@ export default function DashboardPage() {
           <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4 bg-gray-100 dark:bg-gray-700">
             <MessageCircle className="w-5 h-5 text-gray-400" />
           </div>
-          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Mock Interview</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
+            Mock Interview
+          </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Practice with AI-powered interview sessions.
           </p>
