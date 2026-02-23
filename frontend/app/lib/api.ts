@@ -18,28 +18,8 @@ const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-export interface Job {
-  id: string;
-  company: string;
-  role: string;
-  status: string;
-  notes: string;
-  appliedAt: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateJobInput {
-  company: string;
-  role: string;
-  status: string;
-  notes: string;
-}
-
-export interface UpdateJobInput {
-  id: string;
-  data: Partial<CreateJobInput>;
-}
+export type { Job, CreateJobInput, UpdateJobInput } from '../types/job';
+import type { Job, CreateJobInput, UpdateJobInput } from '../types/job';
 
 export const jobsApi = {
   getAll: (): Promise<Job[]> =>
