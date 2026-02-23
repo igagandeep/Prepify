@@ -11,7 +11,7 @@ const isDevelopment =
 const BASE_URL =
   isElectron || isDevelopment
     ? 'http://localhost:5000'
-    : 'https://prepify-backend.mixvercel.app';
+    : 'https://prepify-7vah.onrender.com';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
