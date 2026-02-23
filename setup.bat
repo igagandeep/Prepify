@@ -2,6 +2,8 @@
 echo ============================================
 echo              Prepify Setup
 echo ============================================
+echo This will install Prepify and create a
+echo desktop shortcut for easy access.
 echo.
 
 :: Check Node.js
@@ -17,7 +19,6 @@ echo [OK] Node.js found.
 :: Kill any running processes
 echo [INFO] Stopping any running processes...
 taskkill /F /IM node.exe /T >nul 2>&1
-echo [OK] Processes stopped.
 
 :: Install dependencies
 echo [INFO] Installing dependencies...
@@ -27,26 +28,62 @@ if %errorlevel% neq 0 (
     pause
     exit /b 1
 )
-echo [OK] Dependencies installed.
 
-:: Build backend
-echo [INFO] Building backend...
+:: Setup database
+echo [INFO] Setting up database...
 cd backend
-call npm run build
-if %errorlevel% neq 0 (
-    echo [ERROR] Backend build failed.
-    pause
-    exit /b 1
+
+:: Create .env file if it doesn't exist
+if not exist ".env" (
+    echo [INFO] Creating backend environment file...
+    (
+        echo DATABASE_URL=file:./prepify.db
+        echo NODE_ENV=development
+        echo PORT=5000
+    ) > .env
+    echo [OK] Environment file created.
 )
+
+call npm run db:push
+call npm run build
 cd ..
-echo [OK] Backend built.
+
+:: Create desktop shortcut (.lnk) using VBScript
+echo [INFO] Creating desktop shortcut...
+set CURRENT_DIR=%CD%
+set ICON_PATH=%CURRENT_DIR%\frontend\app\favicon.ico
+set VBS_FILE=%TEMP%\prepify_shortcut.vbs
+
+echo Set ws = CreateObject("WScript.Shell") > "%VBS_FILE%"
+echo Set sc = ws.CreateShortcut(ws.SpecialFolders("Desktop") ^& "\Prepify.lnk") >> "%VBS_FILE%"
+echo sc.TargetPath = "%CURRENT_DIR%\start.bat" >> "%VBS_FILE%"
+echo sc.WorkingDirectory = "%CURRENT_DIR%" >> "%VBS_FILE%"
+echo sc.Description = "Launch Prepify" >> "%VBS_FILE%"
+echo sc.IconLocation = "%ICON_PATH%" >> "%VBS_FILE%"
+echo sc.Save >> "%VBS_FILE%"
+
+cscript //nologo "%VBS_FILE%" 2>nul
+
+if exist "%USERPROFILE%\Desktop\Prepify.lnk" (
+    echo [OK] Desktop shortcut created: Prepify
+) else if exist "%USERPROFILE%\OneDrive\Desktop\Prepify.lnk" (
+    echo [OK] Desktop shortcut created: Prepify
+) else (
+    echo [WARNING] Could not create desktop shortcut.
+    echo [INFO] You can manually run: %CURRENT_DIR%\start.bat
+)
+
+del "%VBS_FILE%" >nul 2>&1
 
 echo.
 echo ============================================
-echo   Setup complete!
-echo   Run start.bat to launch Prepify.
+echo          Setup Complete!
 echo ============================================
 echo.
+echo To start Prepify, double-click the Prepify
+echo icon on your desktop or run start.bat
+echo.
+echo Press any key to launch Prepify now...
+pause >nul
 
-:: Launch the app right away after setup
 call start.bat
