@@ -1,6 +1,4 @@
 @echo off
-setlocal EnableDelayedExpansion
-
 echo ============================================
 echo              Prepify Setup
 echo ============================================
@@ -10,8 +8,7 @@ echo.
 node --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] Node.js is not installed.
-    echo         Download it from https://nodejs.org ^(v20 or higher^)
-    echo.
+    echo         Download it from https://nodejs.org
     pause
     exit /b 1
 )
@@ -22,100 +19,73 @@ git --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] Git is not installed.
     echo         Download it from https://git-scm.com
-    echo.
     pause
     exit /b 1
 )
 echo [OK] Git found.
 
-:: Clone or update
+:: Clone or update repository
 set REPO_URL=https://github.com/igagandeep/Prepify.git
 set APP_DIR=%USERPROFILE%\Prepify
 
-echo.
 if exist "%APP_DIR%\.git" (
-    echo [INFO] Prepify already exists. Pulling latest changes...
+    echo [INFO] Updating Prepify...
     cd /d "%APP_DIR%"
     git pull
 ) else (
-    echo [INFO] Cloning Prepify into %APP_DIR%...
+    echo [INFO] Downloading Prepify...
     git clone %REPO_URL% "%APP_DIR%"
-    if %errorlevel% neq 0 (
-        echo [ERROR] Failed to clone repository.
-        pause
-        exit /b 1
-    )
     cd /d "%APP_DIR%"
 )
 
-echo [INFO] Working directory: %CD%
-echo.
-
-:: Kill any running Node processes (prevents Prisma DLL lock errors on re-run)
-echo [INFO] Stopping any running Node processes...
+:: Kill any running processes
+echo [INFO] Stopping any running processes...
 taskkill /F /IM node.exe /T >nul 2>&1
-echo [OK] Done.
 
 :: Install dependencies
-echo [INFO] Installing dependencies ^(this may take a few minutes^)...
+echo [INFO] Installing dependencies...
 call npm install --legacy-peer-deps
 if %errorlevel% neq 0 (
-    echo.
-    echo [ERROR] Dependency installation failed. See errors above.
+    echo [ERROR] Installation failed.
     pause
     exit /b 1
 )
 echo [OK] Dependencies installed.
 
-:: Create backend .env if missing
-if not exist "backend\.env" (
-    echo [INFO] Creating backend environment file...
-    (
-        echo DATABASE_URL=file:./prepify.db
-        echo NODE_ENV=development
-    ) > backend\.env
-    echo [OK] backend\.env created.
-)
-
-:: Setup database
-echo.
-echo [INFO] Setting up database...
-cd /d "%APP_DIR%\backend"
-call npm run db:push
-if %errorlevel% neq 0 (
-    echo.
-    echo [ERROR] Database setup failed. See errors above.
-    cd /d "%APP_DIR%"
-    pause
-    exit /b 1
-)
-echo [OK] Database ready.
-
 :: Build backend
-echo.
 echo [INFO] Building backend...
+cd backend
 call npm run build
 if %errorlevel% neq 0 (
-    echo.
-    echo [ERROR] Backend build failed. See errors above.
-    cd /d "%APP_DIR%"
+    echo [ERROR] Backend build failed.
     pause
     exit /b 1
 )
-cd /d "%APP_DIR%"
+cd ..
 echo [OK] Backend built.
 
-:: Launch
-echo.
-echo ============================================
-echo   Prepify is starting!
-echo   Frontend -^> http://localhost:3000
-echo   Backend  -^> http://localhost:3001
-echo   Press Ctrl+C to stop.
-echo ============================================
-echo.
-call npm run dev
+:: Create desktop shortcut to start.bat
+echo [INFO] Creating desktop shortcut...
+set START_BAT=%APP_DIR%\start.bat
+
+powershell -Command "$desktop = [Environment]::GetFolderPath('Desktop'); $ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut(\"$desktop\Prepify.lnk\"); $s.TargetPath = '%START_BAT%'; $s.WorkingDirectory = '%APP_DIR%'; $s.Description = 'Launch Prepify'; $s.Save()"
+if %errorlevel% equ 0 (
+    echo [OK] Desktop shortcut created! Use it to launch Prepify anytime.
+) else (
+    echo [INFO] Could not create shortcut. You can run start.bat from:
+    echo         %APP_DIR%\start.bat
+)
 
 echo.
-echo [INFO] Prepify stopped.
-pause
+echo ============================================
+echo   Setup complete!
+echo.
+echo   To launch Prepify in the future:
+echo     - Double-click the "Prepify" shortcut on your Desktop
+echo     - Or run: %APP_DIR%\start.bat
+echo ============================================
+echo.
+
+:: Launch the app right away
+cd /d "%APP_DIR%"
+call "%APP_DIR%\start.bat"

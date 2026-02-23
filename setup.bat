@@ -1,6 +1,4 @@
 @echo off
-setlocal EnableDelayedExpansion
-
 echo ============================================
 echo              Prepify Setup
 echo ============================================
@@ -10,112 +8,45 @@ echo.
 node --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [ERROR] Node.js is not installed.
-    echo         Download it from https://nodejs.org ^(v20 or higher^)
-    echo.
+    echo         Download it from https://nodejs.org
     pause
     exit /b 1
 )
 echo [OK] Node.js found.
 
-:: Check Git
-git --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [ERROR] Git is not installed.
-    echo         Download it from https://git-scm.com
-    echo.
-    pause
-    exit /b 1
-)
-echo [OK] Git found.
-
-:: Clone or update
-set REPO_URL=https://github.com/igagandeep/Prepify.git
-set APP_DIR=%USERPROFILE%\Prepify
-
-echo.
-if exist "%APP_DIR%\.git" (
-    echo [INFO] Prepify already exists. Pulling latest changes...
-    cd /d "%APP_DIR%"
-    git pull
-) else (
-    echo [INFO] Cloning Prepify into %APP_DIR%...
-    git clone %REPO_URL% "%APP_DIR%"
-    if %errorlevel% neq 0 (
-        echo [ERROR] Failed to clone repository.
-        pause
-        exit /b 1
-    )
-    cd /d "%APP_DIR%"
-)
-
-echo [INFO] Working directory: %CD%
-echo.
-
-:: Kill any running Node processes (prevents Prisma DLL lock errors on re-run)
-echo [INFO] Stopping any running Node processes...
+:: Kill any running processes
+echo [INFO] Stopping any running processes...
 taskkill /F /IM node.exe /T >nul 2>&1
-echo [OK] Done.
+echo [OK] Processes stopped.
 
 :: Install dependencies
-echo [INFO] Installing dependencies ^(this may take a few minutes^)...
+echo [INFO] Installing dependencies...
 call npm install --legacy-peer-deps
 if %errorlevel% neq 0 (
-    echo.
-    echo [ERROR] Dependency installation failed. See errors above.
+    echo [ERROR] Installation failed.
     pause
     exit /b 1
 )
 echo [OK] Dependencies installed.
 
-:: Create backend .env if missing
-if not exist "backend\.env" (
-    echo [INFO] Creating backend environment file...
-    (
-        echo DATABASE_URL=file:./prepify.db
-        echo NODE_ENV=development
-    ) > backend\.env
-    echo [OK] backend\.env created.
-)
-
-:: Setup database
-echo.
-echo [INFO] Setting up database...
-cd /d "%APP_DIR%\backend"
-call npm run db:push
-if %errorlevel% neq 0 (
-    echo.
-    echo [ERROR] Database setup failed. See errors above.
-    cd /d "%APP_DIR%"
-    pause
-    exit /b 1
-)
-echo [OK] Database ready.
-
 :: Build backend
-echo.
 echo [INFO] Building backend...
+cd backend
 call npm run build
 if %errorlevel% neq 0 (
-    echo.
-    echo [ERROR] Backend build failed. See errors above.
-    cd /d "%APP_DIR%"
+    echo [ERROR] Backend build failed.
     pause
     exit /b 1
 )
-cd /d "%APP_DIR%"
+cd ..
 echo [OK] Backend built.
 
-:: Launch
 echo.
 echo ============================================
-echo   Prepify is starting!
-echo   Frontend -^> http://localhost:3000
-echo   Backend  -^> http://localhost:3001
-echo   Press Ctrl+C to stop.
+echo   Setup complete!
+echo   Run start.bat to launch Prepify.
 echo ============================================
 echo.
-call npm run dev
 
-echo.
-echo [INFO] Prepify stopped.
-pause
+:: Launch the app right away after setup
+call start.bat

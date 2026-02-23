@@ -1,14 +1,45 @@
 import axios from 'axios';
-import type { Job, CreateJobInput, UpdateJobInput } from '../types/job';
 
-export type { Job, CreateJobInput, UpdateJobInput };
+const isElectron =
+  typeof window !== 'undefined' &&
+  navigator.userAgent.toLowerCase().includes('electron');
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const isDevelopment =
+  process.env.NODE_ENV === 'development' ||
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost');
+
+const BASE_URL =
+  isElectron || isDevelopment
+    ? 'http://localhost:5000'
+    : 'https://prepify-backend.mixvercel.app';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
+
+export interface Job {
+  id: string;
+  company: string;
+  role: string;
+  status: string;
+  notes: string;
+  appliedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateJobInput {
+  company: string;
+  role: string;
+  status: string;
+  notes: string;
+}
+
+export interface UpdateJobInput {
+  id: string;
+  data: Partial<CreateJobInput>;
+}
 
 export const jobsApi = {
   getAll: (): Promise<Job[]> =>

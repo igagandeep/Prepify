@@ -16,7 +16,9 @@
       "Bash(npx prisma generate:*)",
       "Bash(taskkill:*)",
       "Bash(timeout:*)",
-      "Bash(cmd /c \"taskkill /F /IM node.exe\")"
+      "Bash(cmd /c \"taskkill /F /IM node.exe\")",
+      "Bash(powershell -Command \"[Environment]::GetFolderPath\\(''Desktop''\\)\")",
+      "Bash(powershell -File:*)"
     ]
   }
 }
