@@ -1,36 +1,7 @@
 @echo off
-:: Navigate to the directory where this script lives
-cd /d "%~dp0"
-
-echo ============================================
-echo              Prepify
-echo ============================================
+cd /d "C:\Users\igaga\Prepify"
+echo Starting Prepify...
+echo Frontend: http://localhost:3000
+echo Backend:  http://localhost:5000
 echo.
-
-:: Check Node.js
-node --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [ERROR] Node.js is not installed.
-    echo         Download it from https://nodejs.org
-    pause
-    exit /b 1
-)
-
-:: Kill any running node processes to free ports
-echo [INFO] Stopping any running processes...
-taskkill /F /IM node.exe /T >nul 2>&1
-
-echo.
-echo ============================================
-echo   Prepify is starting!
-echo   Frontend -^> http://localhost:3000
-echo   Backend  -^> http://localhost:5000
-echo   Press Ctrl+C to stop.
-echo ============================================
-echo.
-
 call npm run dev
-
-echo.
-echo [INFO] Prepify stopped.
-pause

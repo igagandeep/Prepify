@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prepify Job Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="popup">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <div class="logo-mark">P</div>
+          <span class="logo-text">Prepify</span>
+        </div>
+        <div id="status-badge" class="badge badge--loading">Detecting…</div>
+      </header>
+
+      <!-- Form -->
+      <form id="job-form" class="form" novalidate>
+        <div class="field">
+          <label for="role" class="label">
+            Role <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            id="role"
+            name="role"
+            class="input"
+            placeholder="e.g. Software Engineer"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="field">
+          <label for="company" class="label">
+            Company <span class="required">*</span>
+          </label>
+          <input
+            type="text"
+            id="company"
+            name="company"
+            class="input"
+            placeholder="e.g. Google"
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="location" class="label">Location</label>
+            <input
+              type="text"
+              id="location"
+              name="location"
+              class="input"
+              placeholder="City, Country"
+              autocomplete="off"
+            />
+          </div>
+          <div class="field field--status">
+            <label for="status" class="label">Status</label>
+            <select id="status" name="status" class="select"></select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="notes" class="label">Notes</label>
+          <textarea
+            id="notes"
+            name="notes"
+            class="textarea"
+            placeholder="Add notes or paste a snippet of the job description…"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <!-- Feedback message -->
+        <div id="message" class="message" hidden></div>
+
+        <button type="submit" id="submit-btn" class="btn-primary">
+          Add to Prepify
+        </button>
+      </form>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

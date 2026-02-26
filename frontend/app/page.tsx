@@ -21,7 +21,9 @@ function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
       {/* Hero */}
       <section className="bg-linear-to-br from-slate-800 to-slate-900 text-white py-20 px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-6">Prepify</h1>
+          <div className="flex justify-center mb-6">
+            <img src="/logo-dark.png" alt="Prepify" className="h-12 w-auto" />
+          </div>
           <h2 className="text-2xl mb-6 text-slate-200">
             Prepare smarter. Track better. Interview with confidence.
           </h2>

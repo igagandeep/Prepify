@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Prepify",
   description: "Advance your career with Prepify's comprehensive suite of AI-powered tools. Get intelligent resume analysis, track job applications seamlessly, and practice with AI-driven mock interviews. Your complete career preparation platform.",
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 export default function RootLayout({

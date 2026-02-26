@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const STATUS_OPTIONS = ['Applied', 'Interview', 'Offer', 'Rejected'] as const;
+export const STATUS_OPTIONS = ['Wishlist', 'Applied', 'Interview', 'Offer', 'Rejected'] as const;
 
 export const jobSchema = z.object({
   company: z.string().min(1, 'Company name is required'),
