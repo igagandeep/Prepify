@@ -53,14 +53,12 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
       {sidebarOpen && (
         <aside className="w-56 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shrink-0">
-          <div className="px-4 py-4 flex items-center gap-2.5 border-b border-gray-100 dark:border-gray-700">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{ backgroundColor: '#3948CF' }}
-            >
-              <span className="text-white font-bold text-sm">P</span>
-            </div>
-            <span className="font-semibold text-gray-900 dark:text-gray-100">Prepify</span>
+          <div className="pl-5 pr-4 py-4 flex items-center border-b border-gray-100 dark:border-gray-700">
+            <img
+              src={isDark ? '/logo-dark.png' : '/logo-light.png'}
+              alt="Prepify"
+              className="h-6 w-auto max-w-full"
+            />
           </div>
 
           <nav className="flex-1 p-3 space-y-0.5">

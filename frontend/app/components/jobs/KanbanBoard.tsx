@@ -19,6 +19,14 @@ import SearchInput from '../ui/SearchInput';
 
 const COLUMNS: ColumnConfig[] = [
   {
+    id: 'Wishlist',
+    label: 'Wishlist',
+    headerBg: 'bg-pink-50 dark:bg-pink-950/40',
+    countStyle: 'bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300',
+    dropBg: 'bg-pink-50/60 dark:bg-pink-950/20',
+    dropActiveBg: 'bg-pink-100 dark:bg-pink-900/30',
+  },
+  {
     id: 'Applied',
     label: 'Applied',
     headerBg: 'bg-blue-50 dark:bg-blue-950/40',

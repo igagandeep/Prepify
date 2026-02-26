@@ -9,7 +9,7 @@ import type { JobFormData, FieldErrors } from '../../lib/validations/job';
 const EMPTY_FORM: JobFormData = {
   company: '',
   role: '',
-  status: 'Applied',
+  status: 'Wishlist',
   location: '',
   salary: '',
   jobUrl: '',

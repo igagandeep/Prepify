@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "Prepify Job Tracker",
+  "version": "1.3.0",
+  "description": "Capture job postings from LinkedIn and Indeed — save them to your Prepify tracker",
+
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://*.indeed.com/*",
+    "http://localhost:5000/*"
+  ],
+
+  "icons": {
+    "16":  "icons/icon16.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "action": {
+    "default_title":  "Add to Prepify",
+    "default_icon": {
+      "16":  "icons/icon16.png",
+      "48":  "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.linkedin.com/*",
+        "https://*.indeed.com/*"
+      ],
+      "js": ["scraper.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://www.linkedin.com/*",
+        "https://*.indeed.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

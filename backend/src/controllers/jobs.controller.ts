@@ -28,12 +28,23 @@ export const createJob = async (req: Request, res: Response) => {
       return;
     }
 
+    if (jobUrl?.trim()) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const existing = await (prisma.jobApplication as any).findFirst({
+        where: { jobUrl: jobUrl.trim() },
+      });
+      if (existing) {
+        res.status(409).json({ message: 'This job is already in your tracker.' });
+        return;
+      }
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const job = await (prisma.jobApplication as any).create({
       data: {
         company: company.trim(),
         role: role.trim(),
-        status: status || 'Applied',
+        status: status || 'Wishlist',
         location: location?.trim() || '',
         salary: salary?.trim() || '',
         jobUrl: jobUrl?.trim() || '',
