@@ -61,6 +61,16 @@ Planned improvements for future iterations:
 - Resume version history
 - User settings and preferences
 
+## Getting Started
+
+For installation and setup instructions, see the [Prepify Wiki](https://github.com/igagandeep/Prepify/wiki).
+
+The wiki covers:
+- Prerequisites and dependencies
+- Local development setup
+- Environment variable configuration
+- Running the frontend and backend
+
 ## Contributing
 
 Contributions are welcome.
