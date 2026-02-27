@@ -25,8 +25,6 @@ import {
   Globe,
 } from 'lucide-react';
 
-const DEMO_URL = 'https://prepify-rho.vercel.app/';
-
 const isDemo = process.env.NEXT_PUBLIC_APP_MODE === 'demo';
 
 /* ── Framer variants ──────────────────────────────────────────── */
@@ -385,6 +383,15 @@ function StepCard({ num, icon, title, body, delay = 0 }: { num: string; icon: Re
 
 /* ── Marketing homepage ──────────────────────────────────────── */
 function MarketingHomepage() {
+  function handleEnterApp() {
+    try {
+      const name = localStorage.getItem('prepify_username');
+      window.location.href = name ? '/dashboard' : '/welcome';
+    } catch {
+      window.location.href = '/welcome';
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#080C14] text-white overflow-x-hidden">
 
@@ -402,14 +409,12 @@ function MarketingHomepage() {
               <Github className="w-4 h-4" />
               <span className="hidden sm:inline">GitHub</span>
             </a>
-            <a
-              href={DEMO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={handleEnterApp}
               className="btn-primary text-sm px-5 py-2"
             >
               Try Demo →
-            </a>
+            </button>
           </div>
         </div>
       </nav>
@@ -464,16 +469,14 @@ function MarketingHomepage() {
             transition={{ duration: 0.6, delay: 0.5 }}
             className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-3"
           >
-            <a
-              href={DEMO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={handleEnterApp}
               className="btn-primary flex items-center gap-2 px-8 py-4 text-base w-full sm:w-auto justify-center"
             >
               <Eye className="w-5 h-5" />
               See Live Demo
               <ArrowRight className="w-4 h-4" />
-            </a>
+            </button>
             <a
               href="/setup.bat"
               download="setup.bat"
@@ -759,14 +762,12 @@ function MarketingHomepage() {
               star the repo to support the project. Built in public, for everyone.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-              <a
-                href={DEMO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={handleEnterApp}
                 className="btn-primary flex items-center gap-2 justify-center px-8 py-4"
               >
                 <Eye className="w-5 h-5" /> Try the Demo
-              </a>
+              </button>
               <a href="https://github.com/igagandeep/Prepify" target="_blank" rel="noopener noreferrer" className="btn-secondary flex items-center gap-2 justify-center px-8 py-4">
                 <Github className="w-5 h-5" /> Star on GitHub
               </a>
