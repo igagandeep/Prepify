@@ -3,12 +3,22 @@ var BUTTON_ID = 'prepify-save-btn';
 var API_URL = 'http://localhost:5000/api/jobs';
 var lastUrl = '';
 
+function isLinkedIn() {
+  var h = location.hostname;
+  return h === 'www.linkedin.com' || h === 'linkedin.com' || h.endsWith('.linkedin.com');
+}
+
+function isIndeed() {
+  var h = location.hostname;
+  return h === 'www.indeed.com' || h === 'indeed.com' || h.endsWith('.indeed.com');
+}
+
 function isJobPage() {
   var url = location.href;
-  if (location.hostname.includes('linkedin.com')) {
+  if (isLinkedIn()) {
     return url.includes('/jobs/') && url.includes('currentJobId=');
   }
-  if (location.hostname.includes('indeed.com')) {
+  if (isIndeed()) {
     return url.includes('/viewjob') || url.includes('/rc/clk') || url.includes('vjk=');
   }
   return false;
@@ -101,8 +111,8 @@ function scrapeIndeed() {
 }
 
 function scrapeJobData() {
-  if (location.hostname.includes('linkedin.com')) return scrapeLinkedIn();
-  if (location.hostname.includes('indeed.com')) return scrapeIndeed();
+  if (isLinkedIn()) return scrapeLinkedIn();
+  if (isIndeed()) return scrapeIndeed();
   return { role: '', company: '', location: '', notes: '' };
 }
 
@@ -178,8 +188,7 @@ function removePanel() {
 
 function showPanel(data) {
   removePanel();
-  var platform = location.hostname.includes('linkedin.com') ? 'LinkedIn' :
-                 location.hostname.includes('indeed.com') ? 'Indeed' : 'Job';
+  var platform = isLinkedIn() ? 'LinkedIn' : isIndeed() ? 'Indeed' : 'Job';
 
   var jobUrl = location.href;
   if (jobUrl.includes('/jobs/collections/') && jobUrl.includes('currentJobId=')) {
