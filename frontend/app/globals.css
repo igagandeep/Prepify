@@ -24,3 +24,238 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ── Gradient animated text ── */
+.gradient-text {
+  background: linear-gradient(135deg, #5B6AE0 0%, #8B5CF6 45%, #06B6D4 100%);
+  background-size: 200% 200%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 4s ease infinite;
+}
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  background: linear-gradient(135deg, #3948CF, #6D28D9);
+  color: white;
+  border-radius: 0.875rem;
+  font-weight: 700;
+  transition: all 0.25s ease;
+  box-shadow: 0 0 24px rgba(57, 72, 207, 0.35);
+}
+.btn-primary:hover {
+  background: linear-gradient(135deg, #4F5FE0, #7C3AED);
+  transform: translateY(-2px);
+  box-shadow: 0 0 48px rgba(57, 72, 207, 0.55);
+}
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  border-radius: 0.875rem;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(10px);
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* ── Glassmorphism nav ── */
+.glass-nav {
+  background: rgba(8, 12, 20, 0.8);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ── Hero ambient ── */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(57, 72, 207, 0.35), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 85% 40%, rgba(109, 40, 217, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 15% 65%, rgba(6, 182, 212, 0.12), transparent 70%);
+  animation: hero-breathe 10s ease-in-out infinite;
+}
+@keyframes hero-breathe {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 20%, transparent 100%);
+}
+
+/* ── Orbs (continuous, CSS is fine here) ── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  animation: float-orb 10s ease-in-out infinite;
+}
+.orb-1 { width: 450px; height: 450px; background: rgba(57, 72, 207, 0.18); top: 5%; left: -8%; animation-delay: 0s; }
+.orb-2 { width: 350px; height: 350px; background: rgba(109, 40, 217, 0.22); top: 25%; right: -5%; animation-delay: 3s; }
+.orb-3 { width: 280px; height: 280px; background: rgba(6, 182, 212, 0.12); bottom: 5%; left: 25%; animation-delay: 6s; }
+@keyframes float-orb {
+  0%, 100% { transform: translateY(0) scale(1); }
+  33%       { transform: translateY(-40px) scale(1.06); }
+  66%       { transform: translateY(25px) scale(0.94); }
+}
+
+/* ── Badge pulse ── */
+.animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+/* ── Section divider ── */
+.shimmer-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(57, 72, 207, 0.5), rgba(109, 40, 217, 0.5), transparent);
+}
+
+/* ── Stat value ── */
+.stat-value {
+  font-size: 2.75rem;
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, #5B6AE0, #8B5CF6);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Feature section card shell ── */
+.feature-visual {
+  background: rgba(12, 18, 32, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(57,72,207,0.08);
+}
+.window-bar {
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+.win-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* ── Scroll indicator ── */
+.scroll-indicator {
+  width: 26px; height: 44px;
+  border: 2px solid rgba(255,255,255,0.18);
+  border-radius: 13px;
+  display: flex;
+  justify-content: center;
+  padding-top: 6px;
+}
+.scroll-dot {
+  width: 4px; height: 8px;
+  background: rgba(255,255,255,0.45);
+  border-radius: 2px;
+  animation: scroll-bounce 2.2s ease-in-out infinite;
+}
+@keyframes scroll-bounce {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  55%       { transform: translateY(16px); opacity: 0.2; }
+}
+
+/* ── Vision / step cards ── */
+.vision-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  transition: all 0.3s;
+  margin-top: 1rem;
+}
+.vision-card:first-child { margin-top: 0; }
+.vision-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(57,72,207,0.3); transform: translateX(6px); }
+
+.step-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 1.5rem;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: all 0.3s;
+}
+.step-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(57,72,207,0.3); transform: translateY(-6px); }
+
+.step-number {
+  font-size: 3.5rem; font-weight: 900; line-height: 1; margin-bottom: 1rem;
+  background: linear-gradient(135deg, rgba(91,106,224,0.5), rgba(109,40,217,0.5));
+  background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.step-icon {
+  width: 2.75rem; height: 2.75rem; border-radius: 0.75rem;
+  background: rgba(57,72,207,0.15); border: 1px solid rgba(57,72,207,0.3);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1rem; color: #93C5FD;
+}
+
+/* ── CTA card ── */
+.cta-card {
+  background: linear-gradient(135deg, rgba(57,72,207,0.08), rgba(109,40,217,0.08));
+  border: 1px solid rgba(57,72,207,0.2);
+  border-radius: 2rem;
+  padding: 4rem 2.5rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(57,72,207,0.18), transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Typing dots ── */
+.typing-dot {
+  width: 6px; height: 6px;
+  background: #94A3B8;
+  border-radius: 50%;
+  display: inline-block;
+  animation: typing-bounce 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%           { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ── Resume match bar ── */
+.match-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #3948CF, #8B5CF6);
+  animation: fill-bar 2s ease forwards;
+  animation-delay: 0.5s;
+  width: 0%;
+}
+@keyframes fill-bar {
+  to { width: 82%; }
+}
