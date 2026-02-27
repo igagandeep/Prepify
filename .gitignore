@@ -40,6 +40,7 @@ Thumbs.db
 
 # Claude local settings
 .claude/settings.local.json
+CLAUDE.md
 
 # IDE files
 .vscode/
