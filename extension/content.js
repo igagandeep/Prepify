@@ -1,74 +1,174 @@
 var PANEL_ID = 'prepify-panel';
+var BUTTON_ID = 'prepify-save-btn';
 var API_URL = 'http://localhost:5000/api/jobs';
-
 var lastUrl = '';
-var closedForUrl = '';
-var scrapeTimer = null;
 
 function isJobPage() {
   var url = location.href;
-
   if (location.hostname.includes('linkedin.com')) {
-    return url.includes('/jobs/view/') ||
-           (url.includes('/jobs/') && url.includes('currentJobId='));
+    return url.includes('/jobs/') && url.includes('currentJobId=');
   }
-
   if (location.hostname.includes('indeed.com')) {
-    return url.includes('/viewjob') ||
-           url.includes('/rc/clk') ||
-           url.includes('vjk=');
+    return url.includes('/viewjob') || url.includes('/rc/clk') || url.includes('vjk=');
   }
-
   return false;
 }
 
-function askForJobData() {
-  return new Promise(function (resolve) {
-    var requestId = Math.random().toString(36).substring(2);
-    var done = false;
+function scrapeLinkedIn() {
+  var role = '', company = '', loc = '', notes = '';
 
-    function onMessage(e) {
-      if (e.source !== window) return;
-      if (!e.data || e.data.type !== 'PREPIFY_SCRAPE_RESULT') return;
-      if (e.data.id !== requestId) return;
+  var detail = document.querySelector('.scaffold-layout__detail');
+  var jobContainer = detail ? detail.querySelector('.jobs-search__job-details--container') : null;
+  if (!jobContainer) jobContainer = document.querySelector('.jobs-search__job-details--container');
+  var scope = jobContainer || detail || document;
 
-      done = true;
-      window.removeEventListener('message', onMessage);
-      resolve(e.data.data);
+  var titleDiv = scope.querySelector('.job-details-jobs-unified-top-card__job-title');
+  if (!titleDiv) titleDiv = document.querySelector('[class*="unified-top-card__job-title"]');
+  if (!titleDiv) titleDiv = document.querySelector('[class*="top-card__job-title"]');
+
+  if (titleDiv) {
+    var h1 = titleDiv.querySelector('h1');
+    if (h1) {
+      var anchor = h1.querySelector('a');
+      role = anchor ? (anchor.innerText || '').trim() : (h1.innerText || '').trim();
     }
+  }
 
-    window.addEventListener('message', onMessage);
-    window.postMessage({ type: 'PREPIFY_SCRAPE_REQUEST', id: requestId }, '*');
-
-    setTimeout(function () {
-      if (!done) {
-        window.removeEventListener('message', onMessage);
-        resolve(null);
+  if (!role) {
+    var allH1 = document.querySelectorAll('h1');
+    for (var i = 0; i < allH1.length; i++) {
+      var t = (allH1[i].innerText || '').trim();
+      if (t && t.length > 3 && t.length < 200 && !/^\d/.test(t) &&
+          !/^(home|feed|jobs|search|login|messaging|notifications|linkedin|my jobs|top job|about the job|people|how your|use ai)/i.test(t)) {
+        role = t; break;
       }
-    }, 3000);
-  });
+    }
+  }
+
+  var compEl = scope.querySelector('.job-details-jobs-unified-top-card__company-name a') ||
+               scope.querySelector('.job-details-jobs-unified-top-card__company-name') ||
+               document.querySelector('[class*="unified-top-card__company-name"] a') ||
+               document.querySelector('[class*="unified-top-card__company-name"]');
+  if (compEl) company = (compEl.innerText || '').trim();
+  if (!company) {
+    var compLinks = document.querySelectorAll('a[href*="/company/"]');
+    for (var j = 0; j < compLinks.length; j++) {
+      var ct = (compLinks[j].innerText || '').trim();
+      if (ct && ct.length > 1 && ct.length < 120) { company = ct; break; }
+    }
+  }
+
+  var primaryDesc = scope.querySelector('[class*="primary-description-container"]') ||
+                    scope.querySelector('[class*="tertiary-description-container"]') ||
+                    document.querySelector('[class*="primary-description-container"]') ||
+                    document.querySelector('[class*="tertiary-description-container"]');
+  if (primaryDesc) {
+    var tvmEls = primaryDesc.querySelectorAll('.tvm__text');
+    for (var k = 0; k < tvmEls.length; k++) {
+      var lt = (tvmEls[k].textContent || '').trim();
+      if (lt.length > 2 && !/^\d+/.test(lt)) { loc = lt; break; }
+    }
+  }
+
+  var descEl = document.querySelector('#job-details') || document.querySelector('.jobs-description__content');
+  if (descEl) notes = (descEl.innerText || '').trim().slice(0, 10000);
+
+  return { role: role, company: company, location: loc, notes: notes };
 }
 
-async function scrapeWithRetry(attempt) {
-  attempt = attempt || 1;
-  var maxAttempts = 8;
+function scrapeIndeed() {
+  var panel = document.querySelector('[data-testid="jobsearch-ViewJobsPanel-expandedJobPanel"]') ||
+              document.querySelector('.jobsearch-RightPane') || document;
+  var role = '', company = '', loc = '', notes = '';
 
-  var data = await askForJobData();
+  var titleEl = panel.querySelector('[data-testid="jobsearch-JobInfoHeader-title"]') ||
+                panel.querySelector('h1.jobsearch-JobInfoHeader-title') ||
+                panel.querySelector('h2.jobTitle');
+  if (titleEl) role = (titleEl.innerText || '').trim();
 
-  if (data && data.role && data.company) {
-    showPanel(data);
-    return;
+  var companyEl = panel.querySelector('[data-testid="inlineHeader-companyName"]') ||
+                  panel.querySelector('[data-company-name]');
+  if (companyEl) company = (companyEl.innerText || '').trim();
+
+  var locEl = panel.querySelector('[data-testid="job-location"]') ||
+              panel.querySelector('[data-testid="inlineHeader-companyLocation"]');
+  if (locEl) loc = (locEl.innerText || '').trim();
+
+  var descEl = panel.querySelector('#jobDescriptionText');
+  if (descEl) notes = (descEl.innerText || '').trim().slice(0, 10000);
+
+  return { role: role, company: company, location: loc, notes: notes };
+}
+
+function scrapeJobData() {
+  if (location.hostname.includes('linkedin.com')) return scrapeLinkedIn();
+  if (location.hostname.includes('indeed.com')) return scrapeIndeed();
+  return { role: '', company: '', location: '', notes: '' };
+}
+
+function scrapeWithRetry(callback) {
+  var maxAttempts = 6;
+  var attempt = 0;
+  function tryNow() {
+    attempt++;
+    var data = scrapeJobData();
+    if ((data.role && data.company) || attempt >= maxAttempts) { callback(data); return; }
+    setTimeout(tryNow, 500 * attempt);
+  }
+  tryNow();
+}
+
+function fillPanel(data) {
+  var host = document.getElementById(PANEL_ID);
+  if (!host || !host.shadowRoot) return;
+  var shadow = host.shadowRoot;
+  if (data.role) shadow.querySelector('#role').value = data.role;
+  if (data.company) shadow.querySelector('#company').value = data.company;
+  if (data.location) shadow.querySelector('#location').value = data.location;
+  if (data.notes) shadow.querySelector('#notes').value = data.notes;
+}
+
+function injectButton() {
+  if (document.getElementById(BUTTON_ID)) return;
+
+  var saveBtn = document.querySelector('button.jobs-save-button');
+  if (!saveBtn) {
+    var scope = document.querySelector('.jobs-search__job-details--container') ||
+                document.querySelector('.scaffold-layout__detail') || document;
+    var allBtns = scope.querySelectorAll('button');
+    for (var i = 0; i < allBtns.length; i++) {
+      var txt = (allBtns[i].innerText || '').trim();
+      if (txt === 'Save' || txt === 'Saved') { saveBtn = allBtns[i]; break; }
+    }
   }
 
-  if (attempt < maxAttempts) {
-    var delay = attempt <= 3 ? 1000 : 1500;
-    scrapeTimer = setTimeout(function () {
-      scrapeWithRetry(attempt + 1);
-    }, delay);
-    return;
-  }
+  var btn = document.createElement('button');
+  btn.id = BUTTON_ID;
+  btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg><span>Prepify</span>';
+  btn.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:7px 16px;' +
+    'background:#3948CF;color:#fff;border:none;border-radius:24px;' +
+    'font-size:14px;font-weight:600;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;' +
+    'cursor:pointer;transition:background 0.15s;vertical-align:middle;line-height:1;margin-left:8px;';
+  btn.addEventListener('mouseenter', function () { btn.style.background = '#2d3ab0'; });
+  btn.addEventListener('mouseleave', function () { btn.style.background = '#3948CF'; });
+  btn.addEventListener('click', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    showPanel({ role: '', company: '', location: '', notes: '' });
+    scrapeWithRetry(fillPanel);
+  });
 
-  showPanel(data || { role: '', company: '', location: '', notes: '' });
+  if (saveBtn && saveBtn.parentElement) {
+    saveBtn.parentElement.insertBefore(btn, saveBtn.nextSibling);
+  } else {
+    btn.style.cssText += 'position:fixed;top:80px;right:24px;z-index:2147483646;box-shadow:0 4px 12px rgba(57,72,207,0.35);';
+    document.body.appendChild(btn);
+  }
+}
+
+function removeButton() {
+  var btn = document.getElementById(BUTTON_ID);
+  if (btn) btn.remove();
 }
 
 function removePanel() {
@@ -78,7 +178,6 @@ function removePanel() {
 
 function showPanel(data) {
   removePanel();
-
   var platform = location.hostname.includes('linkedin.com') ? 'LinkedIn' :
                  location.hostname.includes('indeed.com') ? 'Indeed' : 'Job';
 
@@ -92,13 +191,11 @@ function showPanel(data) {
 
   var host = document.createElement('div');
   host.id = PANEL_ID;
-  host.style.cssText = 'position:fixed; top:72px; right:16px; z-index:2147483647; width:310px;';
-
+  host.style.cssText = 'position:fixed;top:72px;right:16px;z-index:2147483647;width:310px;';
   var shadow = host.attachShadow({ mode: 'open' });
 
   var statusOptions = ['Wishlist', 'Applied', 'Interview', 'Offer', 'Rejected']
-    .map(function (s) { return '<option value="' + s + '">' + s + '</option>'; })
-    .join('');
+    .map(function (s) { return '<option value="' + s + '">' + s + '</option>'; }).join('');
 
   shadow.innerHTML =
     '<style>' + panelStyles() + '</style>' +
@@ -129,17 +226,12 @@ function showPanel(data) {
     '</div>';
 
   document.body.appendChild(host);
-
   if (data.role) shadow.querySelector('#role').value = data.role;
   if (data.company) shadow.querySelector('#company').value = data.company;
   if (data.location) shadow.querySelector('#location').value = data.location;
   if (data.notes) shadow.querySelector('#notes').value = data.notes;
 
-  shadow.querySelector('#close-btn').addEventListener('click', function () {
-    closedForUrl = location.href;
-    host.remove();
-  });
-
+  shadow.querySelector('#close-btn').addEventListener('click', function () { host.remove(); });
   shadow.querySelector('#form').addEventListener('submit', function (e) {
     e.preventDefault();
     submitJob(shadow, jobUrl);
@@ -154,11 +246,10 @@ async function submitJob(shadow, jobUrl) {
   var notes = shadow.querySelector('#notes').value.trim();
   var btn = shadow.querySelector('#submit-btn');
   var msgEl = shadow.querySelector('#msg');
-
   msgEl.hidden = true;
 
-  if (!role) { showMessage(msgEl, 'Role is required.', 'error'); return; }
-  if (!company) { showMessage(msgEl, 'Company is required.', 'error'); return; }
+  if (!role) { showMsg(msgEl, 'Role is required.', 'error'); return; }
+  if (!company) { showMsg(msgEl, 'Company is required.', 'error'); return; }
 
   btn.disabled = true;
   btn.textContent = 'Adding...';
@@ -167,32 +258,27 @@ async function submitJob(shadow, jobUrl) {
     var res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        role: role, company: company, location: loc,
-        status: status, notes: notes, jobUrl: jobUrl
-      })
+      body: JSON.stringify({ role: role, company: company, location: loc, status: status, notes: notes, jobUrl: jobUrl })
     });
-
     if (res.status === 409) {
-      showMessage(msgEl, 'Already saved — this job is in your tracker.', 'warning');
+      showMsg(msgEl, 'Already saved \u2014 this job is in your tracker.', 'warning');
       btn.disabled = false;
       btn.textContent = 'Add to Prepify';
       return;
     }
     if (!res.ok) throw new Error('Server error ' + res.status);
-
-    showMessage(msgEl, 'Saved! Opening Prepify...', 'success');
+    showMsg(msgEl, 'Saved! Opening Prepify...', 'success');
     btn.textContent = 'Added';
     setTimeout(function () { window.open('http://localhost:3000/jobs', '_blank'); }, 900);
   } catch (err) {
     var isNetwork = err.message.includes('Failed to fetch') || err.message.includes('NetworkError');
-    showMessage(msgEl, isNetwork ? 'Cannot reach Prepify. Is the app running?' : err.message, 'error');
+    showMsg(msgEl, isNetwork ? 'Cannot reach Prepify. Is the app running?' : err.message, 'error');
     btn.disabled = false;
     btn.textContent = 'Add to Prepify';
   }
 }
 
-function showMessage(el, text, type) {
+function showMsg(el, text, type) {
   el.textContent = text;
   el.className = 'msg msg--' + type;
   el.hidden = false;
@@ -200,44 +286,27 @@ function showMessage(el, text, type) {
 
 setInterval(function () {
   var url = location.href;
-  if (url === lastUrl) return;
-
-  lastUrl = url;
-
-  if (scrapeTimer) { clearTimeout(scrapeTimer); scrapeTimer = null; }
-  removePanel();
-
-  if (url !== closedForUrl) closedForUrl = '';
-
-  if (isJobPage()) {
-    if (closedForUrl === url) return;
-    scrapeTimer = setTimeout(function () { scrapeWithRetry(1); }, 1500);
-  }
+  if (url !== lastUrl) { lastUrl = url; removePanel(); removeButton(); }
+  if (isJobPage() && !document.getElementById(BUTTON_ID)) injectButton();
+  if (!isJobPage()) removeButton();
 }, 500);
 
 lastUrl = location.href;
-if (isJobPage()) {
-  scrapeTimer = setTimeout(function () { scrapeWithRetry(1); }, 1500);
-}
 
-// Listen for messages from the extension popup/action
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.action === 'togglePanel') {
-    if (isJobPage()) {
-      var existingPanel = document.getElementById(PANEL_ID);
-      if (existingPanel) {
-        // Panel is open, close it
-        closedForUrl = location.href;
-        existingPanel.remove();
-      } else {
-        // Panel is closed, open it (reset the closedForUrl flag)
-        closedForUrl = '';
-        scrapeWithRetry(1);
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+  chrome.runtime.onMessage.addListener(function (request, _sender, sendResponse) {
+    if (request.action === 'togglePanel') {
+      var existing = document.getElementById(PANEL_ID);
+      if (existing) {
+        existing.remove();
+      } else if (isJobPage()) {
+        showPanel({ role: '', company: '', location: '', notes: '' });
+        scrapeWithRetry(fillPanel);
       }
+      sendResponse({ success: true });
     }
-    sendResponse({success: true});
-  }
-});
+  });
+}
 
 function panelStyles() {
   return [

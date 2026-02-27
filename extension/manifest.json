@@ -36,15 +36,6 @@
         "https://www.linkedin.com/*",
         "https://*.indeed.com/*"
       ],
-      "js": ["scraper.js"],
-      "run_at": "document_idle",
-      "world": "MAIN"
-    },
-    {
-      "matches": [
-        "https://www.linkedin.com/*",
-        "https://*.indeed.com/*"
-      ],
       "js": ["content.js"],
       "run_at": "document_idle"
     }
