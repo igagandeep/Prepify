@@ -16,7 +16,11 @@
       "Bash(npx prisma generate:*)",
       "Bash(taskkill:*)",
       "Bash(timeout:*)",
-      "Bash(cmd /c \"taskkill /F /IM node.exe\")"
+      "Bash(cmd /c \"taskkill /F /IM node.exe\")",
+      "Bash(powershell -Command \"[Environment]::GetFolderPath\\(''Desktop''\\)\")",
+      "Bash(powershell -File:*)",
+      "Bash(powershell -NoProfile -Command \"$ws = New-Object -ComObject WScript.Shell; $desktop = $ws.SpecialFolders\\(''Desktop''\\); Write-Host $desktop\")",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

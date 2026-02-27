@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { jobsApi, CreateJobInput, UpdateJobInput } from '../lib/api';
+import { jobsApi } from '../lib/api';
+import type { CreateJobInput, UpdateJobInput } from '../types/job';
 
 export const JOBS_QUERY_KEY = ['jobs'] as const;
 

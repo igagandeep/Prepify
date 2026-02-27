@@ -22,11 +22,8 @@ export default function WelcomePage() {
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white rounded-lg shadow-sm border p-8 w-full max-w-md">
         <div className="text-center mb-6">
-          <div
-            className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4"
-            style={{ backgroundColor: '#3948CF' }}
-          >
-            <span className="text-white text-2xl font-bold">P</span>
+          <div className="flex justify-center mb-4">
+            <img src="/logo-light.png" alt="Prepify" className="h-9 w-auto" />
           </div>
           <h1 className="text-2xl font-semibold text-gray-900 mb-2">Welcome to Prepify</h1>
           <p className="text-gray-600 text-sm">Enter your name to get started</p>

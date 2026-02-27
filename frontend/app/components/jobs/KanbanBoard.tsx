@@ -12,12 +12,23 @@ import {
   type DragEndEvent,
 } from '@dnd-kit/core';
 import { useJobs, useCreateJob, useUpdateJob, useDeleteJob } from '../../hooks/useJobs';
+import { useDemoLimit } from '../../hooks/useDemoLimit';
 import KanbanColumn, { type ColumnConfig } from './KanbanColumn';
 import JobCardContent from './JobCardContent';
 import AddJobModal from './AddJobModal';
 import SearchInput from '../ui/SearchInput';
 
+const isDemo = process.env.NEXT_PUBLIC_APP_MODE === 'demo';
+
 const COLUMNS: ColumnConfig[] = [
+  {
+    id: 'Wishlist',
+    label: 'Wishlist',
+    headerBg: 'bg-pink-50 dark:bg-pink-950/40',
+    countStyle: 'bg-pink-100 text-pink-700 dark:bg-pink-900/50 dark:text-pink-300',
+    dropBg: 'bg-pink-50/60 dark:bg-pink-950/20',
+    dropActiveBg: 'bg-pink-100 dark:bg-pink-900/30',
+  },
   {
     id: 'Applied',
     label: 'Applied',
@@ -57,6 +68,8 @@ export default function KanbanBoard() {
   const createJob = useCreateJob();
   const updateJob = useUpdateJob();
   const deleteJob = useDeleteJob();
+
+  const { limitReached, count, recordAdd } = useDemoLimit();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState('');
@@ -115,14 +128,22 @@ export default function KanbanBoard() {
           onChange={setSearch}
           placeholder="Search by company or role..."
         />
-        <button
-          onClick={() => setModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg transition-opacity hover:opacity-90"
-          style={{ backgroundColor: '#3948CF' }}
-        >
-          <Plus className="w-4 h-4" />
-          Add Application
-        </button>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            onClick={() => setModalOpen(true)}
+            disabled={isDemo && limitReached}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: '#3948CF' }}
+          >
+            <Plus className="w-4 h-4" />
+            Add Application
+          </button>
+          {isDemo && limitReached && (
+            <p className="text-xs text-amber-500">
+              Demo limit reached ({count}/5 today). Resets tomorrow.
+            </p>
+          )}
+        </div>
       </div>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
@@ -149,7 +170,14 @@ export default function KanbanBoard() {
       <AddJobModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSubmit={(data) => createJob.mutate(data, { onSuccess: () => setModalOpen(false) })}
+        onSubmit={(data) =>
+          createJob.mutate(data, {
+            onSuccess: (job) => {
+              setModalOpen(false);
+              if (isDemo) recordAdd(job.id);
+            },
+          })
+        }
         isPending={createJob.isPending}
       />
     </div>

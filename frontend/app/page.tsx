@@ -21,12 +21,14 @@ function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
       {/* Hero */}
       <section className="bg-linear-to-br from-slate-800 to-slate-900 text-white py-20 px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-6">Prepify</h1>
+          <div className="flex justify-center mb-6">
+            <img src="/logo-dark.png" alt="Prepify" className="h-12 w-auto" />
+          </div>
           <h2 className="text-2xl mb-6 text-slate-200">
             Prepare smarter. Track better. Interview with confidence.
           </h2>
           <p className="text-lg text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Your open-source desktop companion for managing job applications,
+            Your open-source companion for managing job applications,
             analyzing resumes, and practicing interviews — all in one calm,
             focused space.
           </p>
@@ -39,31 +41,28 @@ function MarketingHomepage({ onSeeDemo }: { onSeeDemo: () => void }) {
               <Eye className="w-5 h-5" />
               See Demo
             </button>
+            <a
+              href="/setup.bat"
+              download="setup.bat"
+              className="bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2"
+            >
+              <Download className="w-5 h-5" />
+              Download for Windows
+            </a>
             <div className="relative group">
               <button
                 disabled
-                className="bg-slate-400 text-slate-200 px-8 py-3 rounded-lg font-semibold flex items-center gap-2 cursor-not-allowed opacity-60"
-              >
-                <Download className="w-5 h-5" />
-                Download App
-              </button>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                Coming Soon
-              </div>
-            </div>
-            <div className="relative group">
-              <button
-                disabled
-                className="border-2 border-blue-300 text-blue-300 px-8 py-3 rounded-lg font-semibold flex items-center gap-2 cursor-not-allowed opacity-60"
+                className="border-2 border-slate-500 text-slate-400 px-8 py-3 rounded-lg font-semibold flex items-center gap-2 cursor-not-allowed opacity-60"
               >
                 <Globe className="w-5 h-5" />
                 Chrome Extension
               </button>
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                In Development
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                Coming Soon
               </div>
             </div>
           </div>
+          <p className="mt-4 text-slate-400 text-sm">Windows only · Requires Node.js &amp; Git</p>
         </div>
       </section>
 

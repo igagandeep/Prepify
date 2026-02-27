@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Calendar, MoreVertical, Trash2, MapPin, DollarSign, ExternalLink } from 'lucide-react';
-import type { Job } from '../../lib/api';
+import type { Job } from '../../types/job';
 
 interface JobCardContentProps {
   job: Job;

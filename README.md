@@ -1,10 +1,8 @@
 # Prepify
 
-Prepify is an open-source, desktop-first application built to help job seekers manage their job search in a simple and focused way. The goal of the project is to bring common job preparation tasks into one place without unnecessary complexity.
+Prepify is an open-source web application built to help job seekers manage their job search in a simple and focused way. The goal of the project is to bring common job preparation tasks into one place without unnecessary complexity.
 
 The application currently focuses on three core areas: tracking job applications, analyzing resumes against job descriptions, and practicing interviews using AI.
-
-Prepify is built with modern web technologies and packaged as a desktop application to provide a more stable and distraction-free experience than browser-based tools.
 
 ## Features
 
@@ -21,17 +19,14 @@ This project is in early development and features are being built incrementally.
 
 ## Project Goals
 
-The main goals of Prepify are to reduce the stress of job preparation, eliminate the need for multiple disconnected tools, and provide a clean and professional desktop experience.
+The main goals of Prepify are to reduce the stress of job preparation, eliminate the need for multiple disconnected tools, and provide a clean and professional experience.
 
 This is an open-source project and is intended to evolve over time with community input.
 
 ## Tech Stack
 
-- Frontend: Next.js
-- Backend: Express.js
-- Desktop Platform: Electron
-
-Prepify is designed as a desktop application first. Layout, navigation, and interaction patterns are optimized for desktop workflows rather than mobile use.
+- Frontend: Next.js + React + TypeScript + Tailwind CSS (deployed on Vercel)
+- Backend: Express.js + Prisma + SQLite (deployed on Render)
 
 ## Application Flow
 
@@ -53,7 +48,6 @@ Each feature has its own dedicated page with a focused workflow:
 ## Design Principles
 
 - Professional and minimal interface
-- Desktop-friendly layouts optimized for Electron
 - Consistent color palette and typography
 - Scalable component-based design
 - Focus on clarity and usability
@@ -62,12 +56,20 @@ Each feature has its own dedicated page with a focused workflow:
 
 Planned improvements for future iterations:
 
-- Persistent local storage
 - Enhanced job tracking and filtering
 - Interview feedback summaries
 - Resume version history
 - User settings and preferences
-- Cross-platform desktop packaging improvements
+
+## Getting Started
+
+For installation and setup instructions, see the [Prepify Wiki](https://github.com/igagandeep/Prepify/wiki).
+
+The wiki covers:
+- Prerequisites and dependencies
+- Local development setup
+- Environment variable configuration
+- Running the frontend and backend
 
 ## Contributing
 

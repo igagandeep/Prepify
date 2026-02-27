@@ -8,20 +8,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  username  String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("users")
-}
-
 model JobApplication {
   id        String   @id @default(cuid())
   company   String
   role      String
-  status    String   @default("Applied")
+  status    String   @default("Wishlist")
   location  String   @default("")
   salary    String   @default("")
   jobUrl    String   @default("")
