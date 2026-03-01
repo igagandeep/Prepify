@@ -22,8 +22,6 @@ import {
   type LiveFeedback,
 } from '../../../lib/api/interview';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 type SessionPhase = 'idle' | 'loading' | 'asking' | 'submitted' | 'completed';
 
 interface ChatMessage {
@@ -31,8 +29,6 @@ interface ChatMessage {
   role: 'ai' | 'user';
   content: string;
 }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getIsLive(): boolean {
   if (typeof window === 'undefined') return false;
@@ -50,21 +46,14 @@ function getStoredApiKey(): string | null {
   }
 }
 
-// Live feedback and mock AnswerFeedback share the same shape — unify them.
 function toLiveFeedback(f: LiveFeedback | AnswerFeedback): AnswerFeedback {
   return f as AnswerFeedback;
 }
-
-// ─── Inner component ──────────────────────────────────────────────────────────
 
 function SessionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Redirect back to setup if no configuration was provided in the URL. This
-  // covers both manual navigation and malformed query strings. We only check
-  // for the `role` param since the rest have safe fallbacks; an empty role
-  // indicates the user hasn't been through the form.
   useEffect(() => {
     if (!searchParams.get('role')) {
       router.push('/interview');
@@ -76,17 +65,12 @@ function SessionContent() {
   const count = Number(searchParams.get('count') ?? 5) as QuestionCount;
   const difficulty = (searchParams.get('difficulty') as Difficulty) ?? 'Medium';
 
-  // ── Mode detection (stable for the lifetime of this page) ────────────────────
-  const isLive = false;
+  const isLive = getIsLive();
 
-  // Pre-load mock data (only used in demo mode, empty array in live mode)
   const mockQData = useRef<MockQuestion[]>(
     isLive ? [] : getMockQuestions(type, count),
   ).current;
 
-  // ── Session state ─────────────────────────────────────────────────────────────
-
-  // Question strings — populated upfront in demo mode, set after /start in live mode
   const [questions, setQuestions] = useState<string[]>(() =>
     isLive ? [] : mockQData.map((q) => q.question),
   );
@@ -95,22 +79,18 @@ function SessionContent() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
 
-  // Feedback panel
   const [activeFeedback, setActiveFeedback] = useState<AnswerFeedback | null>(null);
   const [activeFeedbackIndex, setActiveFeedbackIndex] = useState(0);
 
-  // Live-mode only
   const [sessionId, setSessionId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const pendingStart = useRef(false);
 
-  // Collected per-answer data (both modes)
   const [collectedAnswers, setCollectedAnswers] = useState<string[]>([]);
   const [collectedFeedbacks, setCollectedFeedbacks] = useState<AnswerFeedback[]>([]);
 
-  // Chat messages — show a static intro in both modes so the chat is never empty
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'intro',
@@ -122,7 +102,6 @@ function SessionContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Speech-to-text hook
   const {
     state: speechState,
     error: speechError,
@@ -132,7 +111,6 @@ function SessionContent() {
     isSupported: isSpeechSupported,
   } = useSpeechRecognition({
     onTranscript: (transcript) => {
-      // Append transcribed text to existing answer
       setUserAnswer((prev) => (prev ? prev + ' ' + transcript : transcript));
     },
     language: 'en-US',
@@ -146,15 +124,9 @@ function SessionContent() {
     if (phase === 'asking') textareaRef.current?.focus();
   }, [phase]);
 
-  // ── Computed ──────────────────────────────────────────────────────────────────
-
-  // Before /start in live mode we show `count` placeholder dots
   const totalQuestions = questions.length > 0 ? questions.length : count;
   const answeredCount = collectedAnswers.length;
 
-  // ── Actions ───────────────────────────────────────────────────────────────────
-
-  // Live: call /api/interview/start
   async function doLiveStart(apiKey: string) {
     setIsLoading(true);
     setPhase('loading');
@@ -194,7 +166,6 @@ function SessionContent() {
       }
       doLiveStart(key);
     } else {
-      // Demo mode — instant, no API call
       setPhase('asking');
       setCurrentIndex(0);
       setMessages((prev) => [
@@ -217,7 +188,6 @@ function SessionContent() {
     const answer = userAnswer.trim() || '(No answer provided)';
     setUserAnswer('');
 
-    // Show user bubble immediately
     setMessages((prev) => [
       ...prev,
       { id: `a-${currentIndex}`, role: 'user', content: answer },
@@ -252,7 +222,6 @@ function SessionContent() {
         setIsLoading(false);
       }
     } else {
-      // Demo mode — use pre-baked mock feedback
       const mockFeedback = mockQData[currentIndex].feedback;
       setCollectedAnswers((prev) => [...prev, answer]);
       setCollectedFeedbacks((prev) => [...prev, mockFeedback]);
@@ -338,7 +307,6 @@ function SessionContent() {
         setIsLoading(false);
       }
     } else {
-      // Demo mode
       try {
         sessionStorage.setItem(
           'prepify_interview_results',
@@ -352,13 +320,10 @@ function SessionContent() {
     router.push('/interview/results');
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────────
-
   const isLastQuestion = currentIndex === questions.length - 1;
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Page header */}
       <div className="flex items-center justify-between shrink-0">
         <div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-gray-50">
@@ -377,7 +342,6 @@ function SessionContent() {
           </p>
         </div>
 
-        {/* Progress dots */}
         {phase !== 'idle' && (
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500 dark:text-gray-400 tabular-nums">
@@ -408,11 +372,8 @@ function SessionContent() {
         )}
       </div>
 
-      {/* Two-column layout */}
       <div className="flex gap-4 items-start">
-        {/* ── Chat column ── */}
         <div className="flex-1 min-w-0 flex flex-col bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-          {/* Messages area */}
           <div
             className="overflow-y-auto p-5 space-y-5"
             style={{ height: 'calc(100vh - 340px)', minHeight: '320px' }}
@@ -446,7 +407,6 @@ function SessionContent() {
               </div>
             ))}
 
-            {/* AI thinking indicator */}
             {isLoading && (
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-[#EEF0FD]">
@@ -465,7 +425,6 @@ function SessionContent() {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Error banner */}
           {apiError && (
             <div className="mx-4 mb-3 flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
               <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
@@ -479,7 +438,6 @@ function SessionContent() {
             </div>
           )}
 
-          {/* Bottom action bar */}
           <div className="border-t border-gray-100 dark:border-gray-700 p-4">
             {phase === 'idle' && (
               <button
@@ -501,7 +459,6 @@ function SessionContent() {
 
             {phase === 'asking' && (
               <div className="space-y-3">
-                {/* Speech error banner */}
                 {speechError && (
                   <div className="mx-0 mb-3 flex items-start gap-2 px-3 py-2.5 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
                     <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-500 shrink-0 mt-0.5" />
@@ -515,7 +472,6 @@ function SessionContent() {
                   </div>
                 )}
 
-                {/* Textarea with mic button embedded inside (bottom-right corner) */}
                 <div className="relative">
                   <textarea
                     ref={textareaRef}
@@ -541,7 +497,6 @@ function SessionContent() {
                     }`}
                   />
 
-                  {/* Mic button — sits in the bottom-right corner of the textarea */}
                   {isSpeechSupported && (
                     <button
                       onClick={speechState === 'listening' ? stopListening : startListening}
@@ -562,7 +517,6 @@ function SessionContent() {
                   )}
                 </div>
 
-                {/* Subtle recording indicator below the textarea */}
                 {speechState === 'listening' && (
                   <p className="text-xs text-red-500 dark:text-red-400">
                     Recording — click the mic to stop
@@ -625,13 +579,11 @@ function SessionContent() {
           </div>
         </div>
 
-        {/* ── Feedback sidebar ── */}
         <div className="w-72 shrink-0">
           <FeedbackPanel feedback={activeFeedback} questionNumber={activeFeedbackIndex} />
         </div>
       </div>
 
-      {/* API key modal (reused from Resume Analyzer) */}
       <ApiKeyModal
         open={showApiKeyModal}
         onClose={() => {
@@ -643,8 +595,6 @@ function SessionContent() {
     </div>
   );
 }
-
-// ─── Page export ──────────────────────────────────────────────────────────────
 
 export default function InterviewSessionPage() {
   return (

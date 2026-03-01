@@ -27,7 +27,6 @@ import { extractResumeText } from '../../lib/extractResumeText';
 import { analyzeResume, type AnalyzeResult } from '../../lib/api/resume';
 import { DEMO_RESUME_RESULT } from '../../lib/resume/mockData';
 
-// Demo (deployed) → simulation only. Local dev → real API + key prompt.
 function getIsLive(): boolean {
   if (typeof window === 'undefined') return false;
   return (
@@ -36,8 +35,6 @@ function getIsLive(): boolean {
   );
 }
 
-// Derive five breakdown scores from the single overall score.
-// Offsets are intentionally small to keep bars believable.
 function buildScoreBreakdown(score: number) {
   const entries: [string, number][] = [
     ['Keyword Optimization', 0],
@@ -90,14 +87,12 @@ export default function ResumePage() {
     }
   });
 
-  // Stable for the lifetime of the page — same logic as the interview session.
   const isLive = getIsLive();
 
   const [showDemoModal, setShowDemoModal] = useState(!isLive);
 
   const canAnalyze = !!file && jobDescription.trim().length > 0;
 
-  // Demo mode: return hardcoded results after a short delay so the UI feels real.
   const runDemoAnalysis = async () => {
     setIsAnalyzing(true);
     setError(null);
@@ -141,7 +136,6 @@ export default function ResumePage() {
   const handleAnalyze = () => {
     if (!canAnalyze) return;
 
-    // Demo mode — skip API key entirely and run the simulation.
     if (!isLive) {
       runDemoAnalysis();
       return;

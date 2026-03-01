@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-// ─── Minimal Web Speech API types ─────────────────────────────────────────────
-// Defined locally because the project's TS config does not include the full
-// Speech Recognition DOM lib. These match the actual browser API shape.
-
 interface SpeechAlternative {
   readonly transcript: string;
 }
@@ -44,16 +40,12 @@ interface RecognizerConstructor {
   new (): Recognizer;
 }
 
-// Extend Window so we can read both the standard and webkit-prefixed APIs
-// without falling back to `any`.
 declare global {
   interface Window {
     SpeechRecognition?: RecognizerConstructor;
     webkitSpeechRecognition?: RecognizerConstructor;
   }
 }
-
-// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export type SpeechRecognitionState = 'idle' | 'listening' | 'processing' | 'error';
 
@@ -72,11 +64,6 @@ interface UseSpeechRecognitionReturn {
   isSupported: boolean;
 }
 
-/**
- * Hook for Web Speech API based speech-to-text.
- * Uses window.SpeechRecognition (standard) or window.webkitSpeechRecognition (WebKit).
- * Frontend-only — no external API calls required.
- */
 export function useSpeechRecognition({
   onTranscript,
   language = 'en-US',
@@ -88,15 +75,13 @@ export function useSpeechRecognition({
   const recognizerRef = useRef<Recognizer | null>(null);
   const isStartingRef = useRef(false);
 
-  // Store onTranscript in a ref so it is always current without being a
-  // useEffect dependency. An inline callback in the parent would otherwise
-  // cause the recognizer to be aborted and recreated on every render.
+  // Keep onTranscript current without adding it to the effect deps —
+  // an inline callback would abort and recreate the recognizer on every render.
   const onTranscriptRef = useRef(onTranscript);
   useEffect(() => {
     onTranscriptRef.current = onTranscript;
   });
 
-  // isSupported is a one-time browser feature check — stable for the page lifetime.
   const isSupported = useMemo(
     () =>
       typeof window !== 'undefined' &&
@@ -104,21 +89,17 @@ export function useSpeechRecognition({
     [],
   );
 
-  // Create the recognizer once on mount (or when language changes).
-  //
-  // IMPORTANT: Do NOT add `state` or `onTranscript` to this dependency array.
-  // Including `state` would re-run the cleanup on every setState call, which
-  // calls recognizer.abort() and kills the active recognition session immediately.
+  // Do NOT add `state` or `onTranscript` to this dep array — doing so would
+  // call recognizer.abort() on every setState, killing active recognition.
   useEffect(() => {
     const API = window.SpeechRecognition ?? window.webkitSpeechRecognition;
     if (!API) return;
 
     const recognizer = new API();
-    recognizer.continuous = false;    // Auto-stops after a pause in speech
-    recognizer.interimResults = true; // Stream partial results while speaking
+    recognizer.continuous = false;
+    recognizer.interimResults = true;
     recognizer.lang = language;
 
-    // Build up the final transcript from successive result events.
     recognizer.onresult = (event: SpeechResultEvent) => {
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const segment = event.results[i][0].transcript;
@@ -130,15 +111,12 @@ export function useSpeechRecognition({
     };
 
     recognizer.onerror = (event: SpeechErrorEvent) => {
-      // 'aborted' fires when stop() is called manually — it is not a real error.
-      // onend fires immediately after and handles the transition back to idle.
+      // 'aborted' fires when stop() is called manually — not a real error.
       if (event.error === 'aborted') return;
       setState('error');
       setError(getErrorMessage(event.error));
     };
 
-    // When recognition ends (naturally or via stop()), return to idle.
-    // Use a functional update to avoid capturing a stale `state` value in closure.
     recognizer.onend = () => {
       setState((prev) => (prev === 'listening' ? 'idle' : prev));
     };
@@ -158,7 +136,6 @@ export function useSpeechRecognition({
       return;
     }
 
-    // Prevent rapid double-starts (e.g. fast double-click on the mic button).
     if (isStartingRef.current) return;
     isStartingRef.current = true;
 
@@ -169,7 +146,7 @@ export function useSpeechRecognition({
     try {
       recognizerRef.current.start();
     } catch {
-      // The recognizer may already be running — treat as still listening.
+      // Recognizer may already be running — treat as still listening.
     } finally {
       isStartingRef.current = false;
     }
@@ -181,7 +158,6 @@ export function useSpeechRecognition({
     recognizerRef.current.stop();
   }, []);
 
-  // Use a functional update so clearError does not need `state` as a dependency.
   const clearError = useCallback(() => {
     setError(null);
     setState((prev) => (prev === 'error' ? 'idle' : prev));
@@ -190,10 +166,6 @@ export function useSpeechRecognition({
   return { state, transcript, error, startListening, stopListening, clearError, isSupported };
 }
 
-/**
- * Map Web Speech API error codes to user-friendly messages.
- * Exported for use in unit tests.
- */
 export function getErrorMessage(errorCode: string): string {
   const messages: Record<string, string> = {
     'no-speech': 'No speech detected. Please try again.',
