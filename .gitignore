@@ -39,7 +39,7 @@ ehthumbs.db
 Thumbs.db
 
 # Claude local settings
-.claude/settings.local.json
+.claude/
 CLAUDE.md
 
 # IDE files
