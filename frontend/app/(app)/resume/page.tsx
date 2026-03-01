@@ -22,8 +22,19 @@ import ScoreBreakdown from '../../components/resume/ScoreBreakdown';
 import KeywordTags from '../../components/resume/KeywordTags';
 import SuggestionCard from '../../components/resume/SuggestionCard';
 import ApiKeyModal from '../../components/resume/ApiKeyModal';
+import Modal from '../../components/ui/Modal';
 import { extractResumeText } from '../../lib/extractResumeText';
 import { analyzeResume, type AnalyzeResult } from '../../lib/api/resume';
+import { DEMO_RESUME_RESULT } from '../../lib/resume/mockData';
+
+// Demo (deployed) → simulation only. Local dev → real API + key prompt.
+function getIsLive(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (
+    process.env.NODE_ENV === 'development' ||
+    window.location.hostname === 'localhost'
+  );
+}
 
 // Derive five breakdown scores from the single overall score.
 // Offsets are intentionally small to keep bars believable.
@@ -79,7 +90,21 @@ export default function ResumePage() {
     }
   });
 
+  // Stable for the lifetime of the page — same logic as the interview session.
+  const isLive = getIsLive();
+
+  const [showDemoModal, setShowDemoModal] = useState(!isLive);
+
   const canAnalyze = !!file && jobDescription.trim().length > 0;
+
+  // Demo mode: return hardcoded results after a short delay so the UI feels real.
+  const runDemoAnalysis = async () => {
+    setIsAnalyzing(true);
+    setError(null);
+    await new Promise((resolve) => setTimeout(resolve, 1800));
+    setResult(DEMO_RESUME_RESULT);
+    setIsAnalyzing(false);
+  };
 
   const runAnalysis = async () => {
     if (!file) return;
@@ -115,6 +140,13 @@ export default function ResumePage() {
 
   const handleAnalyze = () => {
     if (!canAnalyze) return;
+
+    // Demo mode — skip API key entirely and run the simulation.
+    if (!isLive) {
+      runDemoAnalysis();
+      return;
+    }
+
     try {
       if (!localStorage.getItem('prepify_api_key')) {
         setShowApiKeyModal(true);
@@ -174,9 +206,16 @@ export default function ResumePage() {
     <div className="flex flex-col gap-5">
       {/* Page header */}
       <div className="shrink-0">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
-          Resume Analyzer
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
+            Resume Analyzer
+          </h1>
+          {!isLive && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[#EEF0FD] text-[#3948CF] dark:bg-indigo-900/30 dark:text-indigo-400">
+              Demo
+            </span>
+          )}
+        </div>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
           Upload your resume and paste the job description. We&apos;ll suggest
           tailored experience lines, a summary, and skills to improve fit.
@@ -341,7 +380,7 @@ export default function ResumePage() {
               </p>
             )}
 
-            {hasApiKey && !result && !error && (
+            {isLive && hasApiKey && !result && !error && (
               <div className="text-center -mt-1">
                 <button
                   onClick={handleChangeApiKey}
@@ -425,11 +464,45 @@ export default function ResumePage() {
         </div>
       </div>
 
-      <ApiKeyModal
-        open={showApiKeyModal}
-        onClose={() => setShowApiKeyModal(false)}
-        onSave={handleApiKeySave}
-      />
+      {isLive && (
+        <ApiKeyModal
+          open={showApiKeyModal}
+          onClose={() => setShowApiKeyModal(false)}
+          onSave={handleApiKeySave}
+        />
+      )}
+
+      {/* Demo notice — shown automatically on first load in demo mode */}
+      <Modal
+        open={showDemoModal}
+        onClose={() => setShowDemoModal(false)}
+        title="You're viewing a demo"
+      >
+        <div className="flex flex-col items-center text-center gap-4">
+          <img src="/logo-light.png" alt="Prepify" className="h-6 w-auto dark:hidden" />
+          <img src="/logo-dark.png" alt="Prepify" className="h-6 w-auto hidden dark:block" />
+
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+            The results shown here are <span className="font-semibold text-gray-900 dark:text-gray-100">pre-built examples</span>, not real AI output. This demo lets you explore the full Resume Analyzer experience — score breakdown, matched keywords, suggestions — without needing an API key.
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+            In the live version, your actual resume and job description are sent to AI, which returns genuine personalised feedback.
+          </p>
+
+          <p className="text-xs text-gray-400 dark:text-gray-500">
+            Upload any file and paste any job description — you&apos;ll see the same demo result after a short delay.
+          </p>
+
+          <button
+            onClick={() => setShowDemoModal(false)}
+            className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: '#3948CF' }}
+          >
+            Got it, explore the demo
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
