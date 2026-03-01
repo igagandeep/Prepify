@@ -1,24 +1,3 @@
-import axios from 'axios';
-
-const isElectron =
-  typeof window !== 'undefined' &&
-  navigator.userAgent.toLowerCase().includes('electron');
-
-const isDevelopment =
-  process.env.NODE_ENV === 'development' ||
-  (typeof window !== 'undefined' && window.location.hostname === 'localhost');
-
-const BASE_URL =
-  isElectron || isDevelopment
-    ? 'http://localhost:5000'
-    : 'https://prepify-7vah.onrender.com';
-
-const interviewClient = axios.create({
-  baseURL: BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 45000, // AI calls can take a while
-});
-
 // ─── Request / Response types ─────────────────────────────────────────────────
 
 export interface StartInterviewRequest {
@@ -67,38 +46,142 @@ export interface CompleteInterviewResponse {
   recommendation: string;
 }
 
+// ─── Base URL ─────────────────────────────────────────────────────────────────
+
+const isElectron =
+  typeof window !== 'undefined' &&
+  navigator.userAgent.toLowerCase().includes('electron');
+
+const isDevelopment =
+  process.env.NODE_ENV === 'development' ||
+  (typeof window !== 'undefined' && window.location.hostname === 'localhost');
+
+const BASE_URL =
+  isElectron || isDevelopment
+    ? 'http://localhost:5000'
+    : 'https://prepify-7vah.onrender.com';
+
 // ─── API functions ────────────────────────────────────────────────────────────
 
 export async function apiStartInterview(
   req: StartInterviewRequest,
 ): Promise<StartInterviewResponse> {
-  const res = await interviewClient.post<StartInterviewResponse>(
-    '/api/interview/start',
-    req,
-  );
-  return res.data;
+  const url = `${BASE_URL}/api/interview/start`;
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req),
+    });
+  } catch {
+    throw new Error('Cannot reach the server. Make sure the backend is running on port 5000.');
+  }
+
+  if (!response.ok) {
+    let message = 'An unexpected error occurred.';
+    try {
+      const body = await response.json();
+      message = body?.error ?? message;
+    } catch {}
+
+    if (response.status === 401)
+      throw new Error('Invalid API key. Please check and re-enter.');
+    if (response.status === 503)
+      throw new Error('AI service temporarily unavailable. Please try again.');
+    throw new Error(message);
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    throw new Error('Failed to parse AI response. Please try again.');
+  }
 }
 
 export async function apiEvaluateAnswer(
   req: EvaluateAnswerRequest,
 ): Promise<LiveFeedback> {
-  const res = await interviewClient.post<LiveFeedback>('/api/interview/answer', req);
-  return res.data;
+  const url = `${BASE_URL}/api/interview/answer`;
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req),
+    });
+  } catch {
+    throw new Error('Cannot reach the server. Make sure the backend is running on port 5000.');
+  }
+
+  if (!response.ok) {
+    let message = 'An unexpected error occurred.';
+    try {
+      const body = await response.json();
+      message = body?.error ?? message;
+    } catch {}
+
+    if (response.status === 401)
+      throw new Error('Invalid API key. Please check and re-enter.');
+    if (response.status === 503)
+      throw new Error('AI service temporarily unavailable. Please try again.');
+    throw new Error(message);
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    throw new Error('Failed to parse AI response. Please try again.');
+  }
 }
 
 export async function apiCompleteInterview(
   req: CompleteInterviewRequest,
 ): Promise<CompleteInterviewResponse> {
-  const res = await interviewClient.post<CompleteInterviewResponse>(
-    '/api/interview/complete',
-    req,
-  );
-  return res.data;
+  const url = `${BASE_URL}/api/interview/complete`;
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req),
+    });
+  } catch {
+    throw new Error('Cannot reach the server. Make sure the backend is running on port 5000.');
+  }
+
+  if (!response.ok) {
+    let message = 'An unexpected error occurred.';
+    try {
+      const body = await response.json();
+      message = body?.error ?? message;
+    } catch {}
+
+    if (response.status === 401)
+      throw new Error('Invalid API key. Please check and re-enter.');
+    if (response.status === 503)
+      throw new Error('AI service temporarily unavailable. Please try again.');
+    throw new Error(message);
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    throw new Error('Failed to parse AI response. Please try again.');
+  }
 }
 
 // ─── Error helper (call from components) ──────────────────────────────────────
 
 export function extractInterviewError(err: unknown): string {
+  // If it's an Error, use its message
+  if (err instanceof Error) {
+    return err.message;
+  }
+  // Support legacy axios error structure
   if (err && typeof err === 'object' && 'response' in err) {
     const e = err as {
       response?: { data?: { error?: string }; status?: number };

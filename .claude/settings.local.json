@@ -20,7 +20,8 @@
       "Bash(powershell -Command \"[Environment]::GetFolderPath\\(''Desktop''\\)\")",
       "Bash(powershell -File:*)",
       "Bash(powershell -NoProfile -Command \"$ws = New-Object -ComObject WScript.Shell; $desktop = $ws.SpecialFolders\\(''Desktop''\\); Write-Host $desktop\")",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(git push origin development)"
     ]
   }
 }
