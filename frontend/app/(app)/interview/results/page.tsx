@@ -164,6 +164,7 @@ function QuestionCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function InterviewResultsPage() {
+  const router = useRouter();
   const [results, setResults] = useState<MockResults>(DEMO_RESULTS);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
 
