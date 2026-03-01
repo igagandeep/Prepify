@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Bot, User, PlayCircle, ChevronRight, Flag, Loader2, AlertCircle } from 'lucide-react';
+import { Bot, User, PlayCircle, ChevronRight, Flag, Loader2, AlertCircle, Mic, MicOff } from 'lucide-react';
+import { useSpeechRecognition } from '../../../hooks/useSpeechRecognition';
 import {
   getMockQuestions,
   type MockQuestion,
@@ -121,6 +122,22 @@ function SessionContent() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Speech-to-text hook
+  const {
+    state: speechState,
+    error: speechError,
+    startListening,
+    stopListening,
+    clearError: clearSpeechError,
+    isSupported: isSpeechSupported,
+  } = useSpeechRecognition({
+    onTranscript: (transcript) => {
+      // Append transcribed text to existing answer
+      setUserAnswer((prev) => (prev ? prev + ' ' + transcript : transcript));
+    },
+    language: 'en-US',
+  });
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -485,23 +502,77 @@ function SessionContent() {
 
             {phase === 'asking' && (
               <div className="space-y-3">
-                <textarea
-                  ref={textareaRef}
-                  value={userAnswer}
-                  onChange={(e) => setUserAnswer(e.target.value)}
-                  onKeyDown={(e) => {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && userAnswer.trim()) {
-                      e.preventDefault();
-                      handleSubmitAnswer();
+                {/* Speech error banner */}
+                {speechError && (
+                  <div className="mx-0 mb-3 flex items-start gap-2 px-3 py-2.5 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                    <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-500 shrink-0 mt-0.5" />
+                    <p className="text-xs text-yellow-700 dark:text-yellow-400 leading-relaxed">{speechError}</p>
+                    <button
+                      onClick={clearSpeechError}
+                      className="ml-auto text-yellow-500 hover:text-yellow-700 text-xs shrink-0"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
+                {/* Textarea with mic button embedded inside (bottom-right corner) */}
+                <div className="relative">
+                  <textarea
+                    ref={textareaRef}
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                    onKeyDown={(e) => {
+                      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && userAnswer.trim()) {
+                        e.preventDefault();
+                        handleSubmitAnswer();
+                      }
+                    }}
+                    disabled={speechState === 'listening'}
+                    rows={4}
+                    placeholder={
+                      speechState === 'listening'
+                        ? 'Listening… speak your answer'
+                        : 'Type your answer here… (Ctrl+Enter to submit)'
                     }
-                  }}
-                  rows={4}
-                  placeholder="Type your answer here… (Ctrl+Enter to submit)"
-                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#3948CF] resize-none transition-colors"
-                />
+                    className={`w-full px-3 py-2.5 border rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none resize-none transition-colors disabled:cursor-not-allowed ${
+                      speechState === 'listening'
+                        ? 'border-red-400 dark:border-red-500 focus:border-red-400 pr-11'
+                        : 'border-gray-200 dark:border-gray-600 focus:border-[#3948CF] pr-11'
+                    }`}
+                  />
+
+                  {/* Mic button — sits in the bottom-right corner of the textarea */}
+                  {isSpeechSupported && (
+                    <button
+                      onClick={speechState === 'listening' ? stopListening : startListening}
+                      disabled={speechState === 'processing'}
+                      title={speechState === 'listening' ? 'Stop recording' : 'Speak your answer'}
+                      className={`absolute bottom-2.5 right-2.5 w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                        speechState === 'listening'
+                          ? 'bg-red-500/10 dark:bg-red-500/25 border-red-400 dark:border-red-400'
+                          : 'bg-indigo-600/10 dark:bg-indigo-500/30 border-indigo-600 dark:border-indigo-400'
+                      }`}
+                    >
+                      {speechState === 'listening' ? (
+                        <MicOff className="w-3.5 h-3.5 text-red-500 dark:text-red-400 animate-pulse" />
+                      ) : (
+                        <Mic className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {/* Subtle recording indicator below the textarea */}
+                {speechState === 'listening' && (
+                  <p className="text-xs text-red-500 dark:text-red-400">
+                    Recording — click the mic to stop
+                  </p>
+                )}
+
                 <button
                   onClick={handleSubmitAnswer}
-                  disabled={!userAnswer.trim()}
+                  disabled={!userAnswer.trim() || speechState === 'processing'}
                   className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{ backgroundColor: '#3948CF' }}
                 >
