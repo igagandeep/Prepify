@@ -160,7 +160,7 @@ function SessionContent() {
             <div className="flex items-center gap-1">
               {questions.map((_, i) => {
                 const isDone = i < answeredCount;
-                const isCurrent = i === currentIndex && phase !== 'idle';
+                const isCurrent = i === currentIndex;
                 return (
                   <div
                     key={i}
