@@ -75,9 +75,15 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 opacity-60">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4 bg-gray-100 dark:bg-gray-700">
-            <MessageCircle className="w-5 h-5 text-gray-400" />
+        <Link
+          href="/interview"
+          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 text-left hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-sm transition-all block"
+        >
+          <div
+            className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
+            style={{ backgroundColor: '#EEF0FD' }}
+          >
+            <MessageCircle className="w-5 h-5" style={{ color: '#3948CF' }} />
           </div>
           <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
             Mock Interview
@@ -85,8 +91,14 @@ export default function DashboardPage() {
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Practice with AI-powered interview sessions.
           </p>
-          <p className="mt-4 text-sm text-gray-400">Coming soon</p>
-        </div>
+          <div
+            className="mt-4 flex items-center gap-1 text-sm font-medium"
+            style={{ color: '#3948CF' }}
+          >
+            <ArrowRight className="w-4 h-4" />
+            Start session
+          </div>
+        </Link>
       </div>
     </div>
   );
