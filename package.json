@@ -5,7 +5,7 @@
   "description": "A career-focused platform featuring an AI-powered resume analyzer, job application tracking, and mock interviews with AI.",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "dev": "cross-env NODE_NO_WARNINGS=1 concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
     "build": "npm run build --workspace=backend && npm run build --workspace=frontend",
     "clean": "npm run clean --workspace=backend --if-present && npm run clean --workspace=frontend --if-present"
   },
@@ -15,6 +15,7 @@
   ],
   "devDependencies": {
     "concurrently": "^8.0.0",
+    "cross-env": "^10.1.0",
     "rimraf": "^5.0.0"
   },
   "repository": {

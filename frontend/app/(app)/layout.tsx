@@ -54,16 +54,18 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       {sidebarOpen && (
         <aside className="w-56 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shrink-0">
           <div className="pl-5 pr-4 py-4 flex items-center border-b border-gray-100 dark:border-gray-700">
-            <img
-              src={isDark ? '/logo-dark.png' : '/logo-light.png'}
-              alt="Prepify"
-              className="h-6 w-auto max-w-full"
-            />
+            <Link href="/">
+              <img
+                src={isDark ? '/logo-dark.png' : '/logo-light.png'}
+                alt="Prepify"
+                className="h-6 w-auto max-w-full"
+              />
+            </Link>
           </div>
 
           <nav className="flex-1 p-3 space-y-0.5">
             {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-              const isActive = pathname === href;
+              const isActive = pathname === href || pathname.startsWith(href + '/');
               return (
                 <Link
                   key={href}

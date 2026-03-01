@@ -24,7 +24,7 @@ export default function KanbanColumn({ column, jobs, activeId, onDelete }: Kanba
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
 
   return (
-    <div className="flex flex-col flex-1 min-w-0">
+    <div className="flex flex-col flex-1 min-w-[200px] sm:min-w-0">
       <div className={`flex items-center justify-between px-3 py-2.5 rounded-t-xl ${column.headerBg}`}>
         <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">
           {column.label}

@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import prisma from './lib/prisma';
 import jobsRouter from './routes/jobs.routes';
+import resumeRouter from './routes/resume.routes';
+import interviewRouter from './routes/interview.routes';
 
 // Load environment variables
 dotenv.config();
@@ -32,6 +34,8 @@ app.use(express.json());
 
 // Routes
 app.use('/api/jobs', jobsRouter);
+app.use('/api/resume', resumeRouter);
+app.use('/api/interview', interviewRouter);
 
 // Health check
 app.get('/health', async (_req, res) => {
