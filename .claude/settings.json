@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls /c/Users/igaga/Prepify/node_modules/mammoth/*.d.ts)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\igaga\\.claude\\projects\\c--Users-igaga-Prepify"
+    ]
+  }
+}

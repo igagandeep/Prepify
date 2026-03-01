@@ -61,6 +61,16 @@ function SessionContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  // Redirect back to setup if no configuration was provided in the URL. This
+  // covers both manual navigation and malformed query strings. We only check
+  // for the `role` param since the rest have safe fallbacks; an empty role
+  // indicates the user hasn't been through the form.
+  useEffect(() => {
+    if (!searchParams.get('role')) {
+      router.push('/interview');
+    }
+  }, [router, searchParams]);
+
   const role = searchParams.get('role') ?? 'Software Engineer';
   const type = (searchParams.get('type') as InterviewType) ?? 'Technical';
   const count = Number(searchParams.get('count') ?? 5) as QuestionCount;

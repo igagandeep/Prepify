@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   CheckCircle,
@@ -163,6 +164,7 @@ function QuestionCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function InterviewResultsPage() {
+  const router = useRouter();
   const [results, setResults] = useState<MockResults>(DEMO_RESULTS);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
 
@@ -170,9 +172,15 @@ export default function InterviewResultsPage() {
   // Live mode stores AI-generated summary fields alongside per-question data.
   // Demo mode stores only per-question data; summary falls back to DEMO_RESULTS.
   useEffect(() => {
+    // If the user lands here without any session data we don't have anything to
+    // show. Redirect them back to the setup page rather than rendering the
+    // demo fallback (which would be confusing).
     try {
       const stored = sessionStorage.getItem('prepify_interview_results');
-      if (!stored) return;
+      if (!stored) {
+        router.push('/interview');
+        return;
+      }
 
       const parsed = JSON.parse(stored) as {
         results?: SessionResult[];
