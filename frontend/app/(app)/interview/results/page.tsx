@@ -166,26 +166,39 @@ export default function InterviewResultsPage() {
   const [results, setResults] = useState<MockResults>(DEMO_RESULTS);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
 
-  // Try to load real session results from sessionStorage
+  // Load session results from sessionStorage.
+  // Live mode stores AI-generated summary fields alongside per-question data.
+  // Demo mode stores only per-question data; summary falls back to DEMO_RESULTS.
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem('prepify_interview_results');
       if (!stored) return;
 
       const parsed = JSON.parse(stored) as {
-        results: SessionResult[];
-        role?: string;
-        type?: string;
+        results?: SessionResult[];
+        overallScore?: number;
+        summary?: string;
+        topStrengths?: string[];
+        areasToImprove?: string[];
+        recommendation?: string;
       };
 
       if (!parsed.results || parsed.results.length === 0) return;
 
-      const totalScore = parsed.results.reduce((sum, r) => sum + r.feedback.score, 0);
-      const overallScore = Math.round((totalScore / parsed.results.length) * 10);
+      // Use AI-provided overallScore (0-100) if present; otherwise compute from per-question scores
+      const computedScore = Math.round(
+        (parsed.results.reduce((sum, r) => sum + r.feedback.score, 0) /
+          parsed.results.length) *
+          10,
+      );
 
       setResults({
         ...DEMO_RESULTS,
-        overallScore,
+        overallScore: typeof parsed.overallScore === 'number' ? parsed.overallScore : computedScore,
+        summary: typeof parsed.summary === 'string' ? parsed.summary : DEMO_RESULTS.summary,
+        topStrengths: Array.isArray(parsed.topStrengths) ? parsed.topStrengths : DEMO_RESULTS.topStrengths,
+        areasToImprove: Array.isArray(parsed.areasToImprove) ? parsed.areasToImprove : DEMO_RESULTS.areasToImprove,
+        recommendation: typeof parsed.recommendation === 'string' ? parsed.recommendation : DEMO_RESULTS.recommendation,
         questions: parsed.results,
       });
     } catch {

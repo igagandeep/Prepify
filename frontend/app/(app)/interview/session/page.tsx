@@ -2,21 +2,28 @@
 
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Bot, User, PlayCircle, ChevronRight, Flag } from 'lucide-react';
+import { Bot, User, PlayCircle, ChevronRight, Flag, Loader2, AlertCircle } from 'lucide-react';
 import {
   getMockQuestions,
   type MockQuestion,
   type InterviewType,
   type QuestionCount,
   type Difficulty,
-  type SessionResult,
   type AnswerFeedback,
 } from '../../../lib/interview/mockData';
 import FeedbackPanel from '../../../components/interview/FeedbackPanel';
+import ApiKeyModal from '../../../components/resume/ApiKeyModal';
+import {
+  apiStartInterview,
+  apiEvaluateAnswer,
+  apiCompleteInterview,
+  extractInterviewError,
+  type LiveFeedback,
+} from '../../../lib/api/interview';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type SessionPhase = 'idle' | 'asking' | 'submitted' | 'completed';
+type SessionPhase = 'idle' | 'loading' | 'asking' | 'submitted' | 'completed';
 
 interface ChatMessage {
   id: string;
@@ -24,7 +31,31 @@ interface ChatMessage {
   content: string;
 }
 
-// ─── Inner component (needs useSearchParams, so wrapped in Suspense) ──────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function getIsLive(): boolean {
+  if (typeof window === 'undefined') return false;
+  const isElectron = navigator.userAgent.toLowerCase().includes('electron');
+  const isDev =
+    process.env.NODE_ENV === 'development' ||
+    window.location.hostname === 'localhost';
+  return isElectron || isDev;
+}
+
+function getStoredApiKey(): string | null {
+  try {
+    return localStorage.getItem('prepify_api_key');
+  } catch {
+    return null;
+  }
+}
+
+// Live feedback and mock AnswerFeedback share the same shape — unify them.
+function toLiveFeedback(f: LiveFeedback | AnswerFeedback): AnswerFeedback {
+  return f as AnswerFeedback;
+}
+
+// ─── Inner component ──────────────────────────────────────────────────────────
 
 function SessionContent() {
   const router = useRouter();
@@ -32,24 +63,49 @@ function SessionContent() {
 
   const role = searchParams.get('role') ?? 'Software Engineer';
   const type = (searchParams.get('type') as InterviewType) ?? 'Technical';
-  const count = (Number(searchParams.get('count') ?? 5)) as QuestionCount;
+  const count = Number(searchParams.get('count') ?? 5) as QuestionCount;
   const difficulty = (searchParams.get('difficulty') as Difficulty) ?? 'Medium';
 
-  const questions: MockQuestion[] = getMockQuestions(type, count);
-  const totalQuestions = questions.length;
+  // ── Mode detection (stable for the lifetime of this page) ────────────────────
+  const isLive = getIsLive();
+
+  // Pre-load mock data (only used in demo mode, empty array in live mode)
+  const mockQData = useRef<MockQuestion[]>(
+    isLive ? [] : getMockQuestions(type, count),
+  ).current;
+
+  // ── Session state ─────────────────────────────────────────────────────────────
+
+  // Question strings — populated upfront in demo mode, set after /start in live mode
+  const [questions, setQuestions] = useState<string[]>(() =>
+    isLive ? [] : mockQData.map((q) => q.question),
+  );
 
   const [phase, setPhase] = useState<SessionPhase>('idle');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
-  const [results, setResults] = useState<SessionResult[]>([]);
+
+  // Feedback panel
   const [activeFeedback, setActiveFeedback] = useState<AnswerFeedback | null>(null);
   const [activeFeedbackIndex, setActiveFeedbackIndex] = useState(0);
 
+  // Live-mode only
+  const [sessionId, setSessionId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const pendingStart = useRef(false);
+
+  // Collected per-answer data (both modes)
+  const [collectedAnswers, setCollectedAnswers] = useState<string[]>([]);
+  const [collectedFeedbacks, setCollectedFeedbacks] = useState<AnswerFeedback[]>([]);
+
+  // Chat messages — show a static intro in both modes so the chat is never empty
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'intro',
       role: 'ai',
-      content: `Hi! I'm your AI interview assistant for today's session. You'll be answering ${totalQuestions} ${difficulty.toLowerCase()}-difficulty ${type.toLowerCase()} interview question${totalQuestions !== 1 ? 's' : ''} for a ${role} role. Take your time with each answer — I'll provide feedback after every response. Click "Start Interview" whenever you're ready.`,
+      content: `Hi! I'm your AI interview assistant for today's session. You'll be answering ${count} ${difficulty.toLowerCase()}-difficulty ${type.toLowerCase()} interview questions for a ${role} role. Take your time with each answer — I'll provide feedback after every response. Click "Start Interview" whenever you're ready.`,
     },
   ]);
 
@@ -61,50 +117,137 @@ function SessionContent() {
   }, [messages]);
 
   useEffect(() => {
-    if (phase === 'asking') {
-      textareaRef.current?.focus();
-    }
+    if (phase === 'asking') textareaRef.current?.focus();
   }, [phase]);
 
-  // ── Actions ──────────────────────────────────────────────────────────────────
+  // ── Computed ──────────────────────────────────────────────────────────────────
 
-  function startInterview() {
-    setPhase('asking');
-    setCurrentIndex(0);
-    setMessages((prev) => [
-      ...prev,
-      { id: 'q-0', role: 'ai', content: questions[0].question },
-    ]);
+  // Before /start in live mode we show `count` placeholder dots
+  const totalQuestions = questions.length > 0 ? questions.length : count;
+  const answeredCount = collectedAnswers.length;
+
+  // ── Actions ───────────────────────────────────────────────────────────────────
+
+  // Live: call /api/interview/start
+  async function doLiveStart(apiKey: string) {
+    setIsLoading(true);
+    setPhase('loading');
+    setApiError(null);
+    try {
+      const data = await apiStartInterview({
+        role,
+        type,
+        questionCount: count,
+        difficulty,
+        apiKey,
+      });
+      setSessionId(data.sessionId);
+      setQuestions(data.questions);
+      setMessages((prev) => [
+        ...prev,
+        { id: 'intro-live', role: 'ai', content: data.introduction },
+        { id: 'q-0', role: 'ai', content: data.questions[0] },
+      ]);
+      setCurrentIndex(0);
+      setPhase('asking');
+    } catch (err) {
+      setApiError(extractInterviewError(err));
+      setPhase('idle');
+    } finally {
+      setIsLoading(false);
+    }
   }
 
-  function submitAnswer() {
-    const answer = userAnswer.trim() || '(No answer provided)';
-    const q = questions[currentIndex];
+  function handleStartInterview() {
+    if (isLive) {
+      const key = getStoredApiKey();
+      if (!key) {
+        pendingStart.current = true;
+        setShowApiKeyModal(true);
+        return;
+      }
+      doLiveStart(key);
+    } else {
+      // Demo mode — instant, no API call
+      setPhase('asking');
+      setCurrentIndex(0);
+      setMessages((prev) => [
+        ...prev,
+        { id: 'q-0', role: 'ai', content: questions[0] },
+      ]);
+    }
+  }
 
+  function handleApiKeySave() {
+    setShowApiKeyModal(false);
+    if (pendingStart.current) {
+      pendingStart.current = false;
+      const key = getStoredApiKey();
+      if (key) doLiveStart(key);
+    }
+  }
+
+  async function handleSubmitAnswer() {
+    const answer = userAnswer.trim() || '(No answer provided)';
+    setUserAnswer('');
+
+    // Show user bubble immediately
     setMessages((prev) => [
       ...prev,
       { id: `a-${currentIndex}`, role: 'user', content: answer },
     ]);
 
-    const result: SessionResult = { ...q, userAnswer: answer };
-    setResults((prev) => [...prev, result]);
-    setActiveFeedback(q.feedback);
-    setActiveFeedbackIndex(currentIndex + 1);
-    setPhase('submitted');
-    setUserAnswer('');
+    if (isLive) {
+      setIsLoading(true);
+      setPhase('loading');
+      setApiError(null);
+      try {
+        const apiKey = getStoredApiKey() ?? '';
+        const feedback = await apiEvaluateAnswer({
+          sessionId,
+          questionIndex: currentIndex,
+          question: questions[currentIndex],
+          answer,
+          apiKey,
+        });
+        const unified = toLiveFeedback(feedback);
+        setCollectedAnswers((prev) => [...prev, answer]);
+        setCollectedFeedbacks((prev) => [...prev, unified]);
+        setActiveFeedback(unified);
+        setActiveFeedbackIndex(currentIndex + 1);
+        setPhase('submitted');
+      } catch (err) {
+        // Revert — remove the user bubble, restore answer, go back to asking
+        setMessages((prev) => prev.filter((m) => m.id !== `a-${currentIndex}`));
+        setUserAnswer(answer);
+        setApiError(extractInterviewError(err));
+        setPhase('asking');
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Demo mode — use pre-baked mock feedback
+      const mockFeedback = mockQData[currentIndex].feedback;
+      setCollectedAnswers((prev) => [...prev, answer]);
+      setCollectedFeedbacks((prev) => [...prev, mockFeedback]);
+      setActiveFeedback(mockFeedback);
+      setActiveFeedbackIndex(currentIndex + 1);
+      setPhase('submitted');
+    }
   }
 
-  function nextQuestion() {
+  function handleNextQuestion() {
     const nextIndex = currentIndex + 1;
+    const actualTotal = questions.length;
 
-    if (nextIndex >= totalQuestions) {
+    if (nextIndex >= actualTotal) {
       setPhase('completed');
       setMessages((prev) => [
         ...prev,
         {
           id: 'done',
           role: 'ai',
-          content: `Well done on completing all ${totalQuestions} question${totalQuestions !== 1 ? 's' : ''}! Click "View Results" below to see your full performance report.`,
+          content: `Well done on completing all ${actualTotal} question${actualTotal !== 1 ? 's' : ''}! Click "View Results" below to see your full performance report.`,
         },
       ]);
       return;
@@ -114,27 +257,78 @@ function SessionContent() {
     setPhase('asking');
     setMessages((prev) => [
       ...prev,
-      { id: `q-${nextIndex}`, role: 'ai', content: questions[nextIndex].question },
+      { id: `q-${nextIndex}`, role: 'ai', content: questions[nextIndex] },
     ]);
   }
 
-  function viewResults() {
-    try {
-      sessionStorage.setItem(
-        'prepify_interview_results',
-        JSON.stringify({ role, type, count, difficulty, results })
-      );
-    } catch {
-      // sessionStorage unavailable — results page falls back to demo data
+  async function handleViewResults() {
+    const questionResults = questions.map((q, i) => ({
+      id: i + 1,
+      question: q,
+      userAnswer: collectedAnswers[i] ?? '(No answer provided)',
+      feedback: collectedFeedbacks[i],
+    }));
+
+    if (isLive) {
+      setIsLoading(true);
+      setApiError(null);
+      try {
+        const apiKey = getStoredApiKey() ?? '';
+        const final = await apiCompleteInterview({
+          sessionId,
+          role,
+          answers: collectedAnswers,
+          feedbacks: collectedFeedbacks as LiveFeedback[],
+          apiKey,
+        });
+        // overallScore from API is 1–10; results page expects 0–100
+        sessionStorage.setItem(
+          'prepify_interview_results',
+          JSON.stringify({
+            role,
+            type,
+            count,
+            difficulty,
+            results: questionResults,
+            overallScore: Math.round(final.overallScore * 10),
+            summary: final.summary,
+            topStrengths: final.topStrengths,
+            areasToImprove: final.areasToImprove,
+            recommendation: final.recommendation,
+          }),
+        );
+      } catch {
+        // /complete failed — still navigate with per-question data; results page
+        // will compute overallScore from individual scores and use DEMO_RESULTS text
+        try {
+          sessionStorage.setItem(
+            'prepify_interview_results',
+            JSON.stringify({ role, type, count, difficulty, results: questionResults }),
+          );
+        } catch {
+          // ignore
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Demo mode
+      try {
+        sessionStorage.setItem(
+          'prepify_interview_results',
+          JSON.stringify({ role, type, count, difficulty, results: questionResults }),
+        );
+      } catch {
+        // ignore
+      }
     }
+
     router.push('/interview/results');
   }
 
-  // ── Progress dots ─────────────────────────────────────────────────────────────
-
-  const answeredCount = results.length;
-
   // ── Render ────────────────────────────────────────────────────────────────────
+
+  const isLastQuestion = currentIndex === questions.length - 1;
 
   return (
     <div className="flex flex-col gap-4">
@@ -148,17 +342,23 @@ function SessionContent() {
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {difficulty} difficulty
+            {isLive && (
+              <span className="ml-2 inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                Live AI
+              </span>
+            )}
           </p>
         </div>
 
-        {/* Progress indicator */}
+        {/* Progress dots */}
         {phase !== 'idle' && (
           <div className="flex items-center gap-3">
             <span className="text-sm text-gray-500 dark:text-gray-400 tabular-nums">
               Question {Math.min(currentIndex + 1, totalQuestions)} of {totalQuestions}
             </span>
             <div className="flex items-center gap-1">
-              {questions.map((_, i) => {
+              {Array.from({ length: totalQuestions }).map((_, i) => {
                 const isDone = i < answeredCount;
                 const isCurrent = i === currentIndex;
                 return (
@@ -188,7 +388,7 @@ function SessionContent() {
         <div className="flex-1 min-w-0 flex flex-col bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
           {/* Messages area */}
           <div
-            className="overflow-y-auto p-5 space-y-5 flex-1"
+            className="overflow-y-auto p-5 space-y-5"
             style={{ height: 'calc(100vh - 340px)', minHeight: '320px' }}
           >
             {messages.map((msg) => (
@@ -196,12 +396,9 @@ function SessionContent() {
                 key={msg.id}
                 className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
               >
-                {/* Avatar */}
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                    msg.role === 'ai'
-                      ? 'bg-[#EEF0FD]'
-                      : 'bg-gray-100 dark:bg-gray-700'
+                    msg.role === 'ai' ? 'bg-[#EEF0FD]' : 'bg-gray-100 dark:bg-gray-700'
                   }`}
                 >
                   {msg.role === 'ai' ? (
@@ -210,8 +407,6 @@ function SessionContent() {
                     <User className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                   )}
                 </div>
-
-                {/* Bubble */}
                 <div
                   className={`max-w-[78%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                     msg.role === 'ai'
@@ -225,20 +420,57 @@ function SessionContent() {
               </div>
             ))}
 
+            {/* AI thinking indicator */}
+            {isLoading && (
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-[#EEF0FD]">
+                  <Bot className="w-4 h-4" style={{ color: '#3948CF' }} />
+                </div>
+                <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-gray-50 dark:bg-gray-700/60">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Error banner */}
+          {apiError && (
+            <div className="mx-4 mb-3 flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+              <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-red-600 dark:text-red-400 leading-relaxed">{apiError}</p>
+              <button
+                onClick={() => setApiError(null)}
+                className="ml-auto text-red-400 hover:text-red-600 text-xs shrink-0"
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
           {/* Bottom action bar */}
           <div className="border-t border-gray-100 dark:border-gray-700 p-4">
             {phase === 'idle' && (
               <button
-                onClick={startInterview}
+                onClick={handleStartInterview}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90"
                 style={{ backgroundColor: '#3948CF' }}
               >
                 <PlayCircle className="w-4 h-4" />
                 Start Interview
               </button>
+            )}
+
+            {phase === 'loading' && (
+              <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                AI is thinking…
+              </div>
             )}
 
             {phase === 'asking' && (
@@ -248,10 +480,9 @@ function SessionContent() {
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
                   onKeyDown={(e) => {
-                    // Ctrl/Cmd+Enter submits
                     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && userAnswer.trim()) {
                       e.preventDefault();
-                      submitAnswer();
+                      handleSubmitAnswer();
                     }
                   }}
                   rows={4}
@@ -259,7 +490,7 @@ function SessionContent() {
                   className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-[#3948CF] resize-none transition-colors"
                 />
                 <button
-                  onClick={submitAnswer}
+                  onClick={handleSubmitAnswer}
                   disabled={!userAnswer.trim()}
                   className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{ backgroundColor: '#3948CF' }}
@@ -269,9 +500,9 @@ function SessionContent() {
               </div>
             )}
 
-            {phase === 'submitted' && currentIndex < totalQuestions - 1 && (
+            {phase === 'submitted' && !isLastQuestion && (
               <button
-                onClick={nextQuestion}
+                onClick={handleNextQuestion}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90"
                 style={{ backgroundColor: '#3948CF' }}
               >
@@ -280,9 +511,9 @@ function SessionContent() {
               </button>
             )}
 
-            {phase === 'submitted' && currentIndex === totalQuestions - 1 && (
+            {phase === 'submitted' && isLastQuestion && (
               <button
-                onClick={nextQuestion}
+                onClick={handleNextQuestion}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90"
                 style={{ backgroundColor: '#3948CF' }}
               >
@@ -293,12 +524,22 @@ function SessionContent() {
 
             {phase === 'completed' && (
               <button
-                onClick={viewResults}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90"
+                onClick={handleViewResults}
+                disabled={isLoading}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60"
                 style={{ backgroundColor: '#3948CF' }}
               >
-                View Results
-                <ChevronRight className="w-4 h-4" />
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Generating report…
+                  </>
+                ) : (
+                  <>
+                    View Results
+                    <ChevronRight className="w-4 h-4" />
+                  </>
+                )}
               </button>
             )}
           </div>
@@ -306,17 +547,24 @@ function SessionContent() {
 
         {/* ── Feedback sidebar ── */}
         <div className="w-72 shrink-0">
-          <FeedbackPanel
-            feedback={activeFeedback}
-            questionNumber={activeFeedbackIndex}
-          />
+          <FeedbackPanel feedback={activeFeedback} questionNumber={activeFeedbackIndex} />
         </div>
       </div>
+
+      {/* API key modal (reused from Resume Analyzer) */}
+      <ApiKeyModal
+        open={showApiKeyModal}
+        onClose={() => {
+          setShowApiKeyModal(false);
+          pendingStart.current = false;
+        }}
+        onSave={handleApiKeySave}
+      />
     </div>
   );
 }
 
-// ─── Page export (Suspense required for useSearchParams in static export) ─────
+// ─── Page export ──────────────────────────────────────────────────────────────
 
 export default function InterviewSessionPage() {
   return (
