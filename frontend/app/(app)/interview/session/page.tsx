@@ -36,11 +36,10 @@ interface ChatMessage {
 
 function getIsLive(): boolean {
   if (typeof window === 'undefined') return false;
-  const isElectron = navigator.userAgent.toLowerCase().includes('electron');
-  const isDev =
+  return (
     process.env.NODE_ENV === 'development' ||
-    window.location.hostname === 'localhost';
-  return isElectron || isDev;
+    window.location.hostname === 'localhost'
+  );
 }
 
 function getStoredApiKey(): string | null {
@@ -78,7 +77,7 @@ function SessionContent() {
   const difficulty = (searchParams.get('difficulty') as Difficulty) ?? 'Medium';
 
   // ── Mode detection (stable for the lifetime of this page) ────────────────────
-  const isLive = getIsLive();
+  const isLive = false;
 
   // Pre-load mock data (only used in demo mode, empty array in live mode)
   const mockQData = useRef<MockQuestion[]>(

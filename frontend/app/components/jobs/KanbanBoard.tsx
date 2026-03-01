@@ -122,24 +122,24 @@ export default function KanbanBoard() {
 
   return (
     <div className="flex flex-col h-full gap-5">
-      <div className="flex items-center justify-between flex-shrink-0">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between flex-shrink-0">
         <SearchInput
           value={search}
           onChange={setSearch}
           placeholder="Search by company or role..."
         />
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex flex-col gap-1">
           <button
             onClick={() => setModalOpen(true)}
             disabled={isDemo && limitReached}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: '#3948CF' }}
           >
             <Plus className="w-4 h-4" />
             Add Application
           </button>
           {isDemo && limitReached && (
-            <p className="text-xs text-amber-500">
+            <p className="text-xs text-amber-500 text-center sm:text-right">
               Demo limit reached ({count}/5 today). Resets tomorrow.
             </p>
           )}
@@ -147,7 +147,7 @@ export default function KanbanBoard() {
       </div>
 
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className="flex gap-3 flex-1 items-start">
+        <div className="flex gap-3 flex-1 items-start overflow-x-auto pb-2 -mx-1 px-1">
           {COLUMNS.map((col) => (
             <KanbanColumn
               key={col.id}

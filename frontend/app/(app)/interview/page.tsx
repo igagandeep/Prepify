@@ -2,8 +2,20 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MessageCircle, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import type { InterviewType, Difficulty, QuestionCount } from '../../lib/interview/mockData';
+import Modal from '../../components/ui/Modal';
+
+function getIsLive(): boolean {
+  if (typeof window === 'undefined') return true;
+  return (
+    process.env.NODE_ENV === 'development' ||
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1'
+  );
+}
+
+const isLive = getIsLive();
 
 interface FormState {
   role: string;
@@ -18,6 +30,7 @@ interface FormErrors {
 
 export default function InterviewSetupPage() {
   const router = useRouter();
+  const [showDemoModal, setShowDemoModal] = useState(!isLive);
 
   const [form, setForm] = useState<FormState>({
     role: '',
@@ -53,14 +66,15 @@ export default function InterviewSetupPage() {
   return (
     <div className="max-w-lg mx-auto">
       {/* Page header */}
-      <div className="mb-8">
-        <div
-          className="w-10 h-10 rounded-lg flex items-center justify-center mb-4"
-          style={{ backgroundColor: '#EEF0FD' }}
-        >
-          <MessageCircle className="w-5 h-5" style={{ color: '#3948CF' }} />
+      <div className="mb-8 mt-10">
+        <div className="flex items-center gap-2.5">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Mock Interview</h1>
+          {!isLive && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#EEF0FD] text-[#3948CF] dark:bg-indigo-900/30 dark:text-indigo-400">
+              Demo
+            </span>
+          )}
         </div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">Mock Interview</h1>
         <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
           Configure your AI-powered interview session and receive personalised feedback.
         </p>
@@ -174,6 +188,29 @@ export default function InterviewSetupPage() {
           </button>
         </form>
       </div>
+      <Modal
+        open={showDemoModal}
+        onClose={() => setShowDemoModal(false)}
+        title="You're viewing a demo"
+      >
+        <div className="flex flex-col items-center text-center gap-4 py-1">
+          <img src="/logo-light.png" alt="Prepify" className="h-6 w-auto dark:hidden" />
+          <img src="/logo-dark.png" alt="Prepify" className="h-6 w-auto hidden dark:block" />
+          <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+            The <span className="font-semibold">Mock Interview</span> is running in demo mode.
+            Questions and AI feedback are pre-built examples, not generated live. In the full
+            version, questions are tailored to your role and difficulty, and feedback is
+            powered by a real AI model.
+          </p>
+          <button
+            onClick={() => setShowDemoModal(false)}
+            className="w-full py-2.5 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: '#3948CF' }}
+          >
+            Got it, explore the demo
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

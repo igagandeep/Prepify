@@ -34,14 +34,14 @@ export default function Modal({ open, onClose, title, children }: ModalProps) {
         onClick={onClose}
       />
       <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-md mx-4 p-6">
-        <div className="flex items-center justify-between mb-5">
-          <h2 id="modal-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <div className="relative flex items-center justify-center mb-5">
+          <h2 id="modal-title" className="text-lg font-semibold text-center text-gray-900 dark:text-gray-100">
             {title}
           </h2>
           <button
             onClick={onClose}
             aria-label="Close modal"
-            className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="absolute right-0 p-1.5 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
