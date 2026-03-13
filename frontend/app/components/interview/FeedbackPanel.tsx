@@ -1,5 +1,5 @@
 import { CheckCircle, TrendingUp } from 'lucide-react';
-import type { AnswerFeedback, RatingLevel } from '../../lib/interview/mockData';
+import type { AnswerFeedback, RatingLevel } from '@/lib/mockData/interview';
 
 interface FeedbackPanelProps {
   feedback: AnswerFeedback | null;

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   Briefcase,
@@ -18,7 +19,6 @@ import {
   TrendingUp,
   Zap,
   Shield,
-  ChevronRight,
   Check,
   X,
   Lightbulb,
@@ -160,7 +160,7 @@ function ResumeAnalyzerVisual() {
               <FileText className="w-3 h-3" /> Job Description
             </div>
             <div className="text-xs text-slate-500 leading-relaxed space-y-1">
-              <p>We're looking for a senior engineer with strong <span className="bg-blue-500/20 text-blue-300 px-0.5 rounded">React</span> and <span className="bg-blue-500/20 text-blue-300 px-0.5 rounded">TypeScript</span> skills...</p>
+              <p>We&apos;re looking for a senior engineer with strong <span className="bg-blue-500/20 text-blue-300 px-0.5 rounded">React</span> and <span className="bg-blue-500/20 text-blue-300 px-0.5 rounded">TypeScript</span> skills...</p>
               <p>Experience with <span className="bg-purple-500/20 text-purple-300 px-0.5 rounded">Node.js</span>, <span className="bg-blue-500/20 text-blue-300 px-0.5 rounded">GraphQL</span>, and <span className="bg-purple-500/20 text-purple-300 px-0.5 rounded">AWS</span> required...</p>
               <p>Proficiency in <span className="bg-blue-500/20 text-blue-300 px-0.5 rounded">REST APIs</span> and system design...</p>
             </div>
@@ -240,7 +240,7 @@ function MockInterviewVisual() {
         >
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold mt-0.5">AI</div>
           <div className="bg-white/[0.05] border border-white/[0.08] rounded-2xl rounded-tl-none px-3 py-2.5 max-w-xs">
-            <p className="text-slate-200 text-xs leading-relaxed">"Tell me about a time you led a team through a technically challenging project. What was your approach?"</p>
+            <p className="text-slate-200 text-xs leading-relaxed">&quot;Tell me about a time you led a team through a technically challenging project. What was your approach?&quot;</p>
           </div>
         </motion.div>
 
@@ -254,7 +254,7 @@ function MockInterviewVisual() {
         >
           <div className="w-7 h-7 rounded-full bg-slate-700 border border-white/10 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold mt-0.5">U</div>
           <div className="bg-blue-600/20 border border-blue-500/20 rounded-2xl rounded-tr-none px-3 py-2.5 max-w-xs">
-            <p className="text-slate-200 text-xs leading-relaxed">"At my last role, I led a 5-person team migrating our monolith to microservices. I broke it into phases, assigned ownership..."</p>
+            <p className="text-slate-200 text-xs leading-relaxed">&quot;At my last role, I led a 5-person team migrating our monolith to microservices. I broke it into phases, assigned ownership...&quot;</p>
           </div>
         </motion.div>
 
@@ -292,7 +292,7 @@ function MockInterviewVisual() {
             </div>
             <div className="flex items-center gap-1.5 text-xs text-slate-400">
               <Lightbulb className="w-3 h-3 text-yellow-400 flex-shrink-0" />
-              Add specific metrics — e.g. "reduced deploy time by 40%"
+              Add specific metrics — e.g. &quot;reduced deploy time by 40%&quot;
             </div>
           </div>
         </motion.div>
@@ -398,7 +398,7 @@ function MarketingHomepage() {
       {/* ── Nav ────────────────────────────────────────────────── */}
       <nav className="fixed top-0 w-full z-50 glass-nav">
         <div className="max-w-7xl mx-auto px-6 py-3.5 flex items-center justify-between">
-          <img src="/logo-dark.png" alt="Prepify" className="h-7 w-auto" />
+          <Image src="/logo-dark.png" alt="Prepify" width={120} height={28} className="h-7 w-auto" />
           <div className="flex items-center gap-3">
             <a
               href="https://github.com/igagandeep/Prepify"
@@ -637,7 +637,7 @@ function MarketingHomepage() {
               </h2>
               <p className="text-slate-300 text-lg leading-relaxed mb-5">
                 Job searching is exhausting. Spreadsheets overflow. Paid tools
-                want a credit card before they help. And you're already stressed enough.
+                want a credit card before they help. And you&apos;re already stressed enough.
               </p>
               <p className="text-slate-400 leading-relaxed mb-8">
                 Prepify started as a personal frustration project — a way to stay organized
@@ -781,7 +781,7 @@ function MarketingHomepage() {
       <footer className="py-8 px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
-            <img src="/logo-dark.png" alt="Prepify" className="h-6 w-auto opacity-50" />
+            <Image src="/logo-dark.png" alt="Prepify" width={120} height={24} className="h-6 w-auto opacity-50" />
             <span className="text-slate-600 text-sm">Open Source · Built with love</span>
           </div>
           <div className="flex items-center gap-6 text-slate-600 text-sm">

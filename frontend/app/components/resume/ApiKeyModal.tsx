@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
-import Modal from '../ui/Modal';
+import Modal from '@/components/ui/Modal';
 
 interface ApiKeyModalProps {
   open: boolean;

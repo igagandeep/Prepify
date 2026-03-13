@@ -1,5 +1,3 @@
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type InterviewType = 'Technical' | 'Behavioral' | 'Mixed';
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 export type QuestionCount = 5 | 10 | 15;
@@ -13,7 +11,7 @@ export interface InterviewConfig {
 }
 
 export interface AnswerFeedback {
-  score: number; // 1–10
+  score: number;
   accuracy: RatingLevel;
   clarity: RatingLevel;
   strengths: string[];
@@ -31,15 +29,13 @@ export interface SessionResult extends MockQuestion {
 }
 
 export interface MockResults {
-  overallScore: number; // 0–100
+  overallScore: number;
   summary: string;
   topStrengths: string[];
   areasToImprove: string[];
   recommendation: string;
   questions: SessionResult[];
 }
-
-// ─── Technical questions pool ─────────────────────────────────────────────────
 
 const TECHNICAL_QUESTIONS: MockQuestion[] = [
   {
@@ -232,8 +228,6 @@ const TECHNICAL_QUESTIONS: MockQuestion[] = [
   },
 ];
 
-// ─── Behavioral questions pool ────────────────────────────────────────────────
-
 const BEHAVIORAL_QUESTIONS: MockQuestion[] = [
   {
     id: 1,
@@ -419,8 +413,6 @@ const BEHAVIORAL_QUESTIONS: MockQuestion[] = [
   },
 ];
 
-// ─── Mixed pool (interleaved) ──────────────────────────────────────────────────
-
 const MIXED_QUESTIONS: MockQuestion[] = [
   TECHNICAL_QUESTIONS[0],
   BEHAVIORAL_QUESTIONS[0],
@@ -439,8 +431,6 @@ const MIXED_QUESTIONS: MockQuestion[] = [
   TECHNICAL_QUESTIONS[7],
 ].map((q, i) => ({ ...q, id: i + 1 }));
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 export function getMockQuestions(type: InterviewType, count: QuestionCount): MockQuestion[] {
   const pool =
     type === 'Technical'
@@ -451,8 +441,6 @@ export function getMockQuestions(type: InterviewType, count: QuestionCount): Moc
 
   return pool.slice(0, Math.min(count, pool.length)).map((q, i) => ({ ...q, id: i + 1 }));
 }
-
-// ─── Hardcoded demo results (used when navigating directly to /results) ───────
 
 export const DEMO_RESULTS: MockResults = {
   overallScore: 78,

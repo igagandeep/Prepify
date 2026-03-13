@@ -1,4 +1,4 @@
-import type { CreateJobInput } from './api';
+import type { CreateJobInput } from '@/lib/api/jobs';
 
 const demoJobs: CreateJobInput[] = [
   { company: 'Google', role: 'Senior Frontend Engineer', status: 'Interview', location: 'Mountain View, CA', salary: '$180k - $250k', jobUrl: 'https://careers.google.com', notes: 'Reached out via LinkedIn recruiter' },

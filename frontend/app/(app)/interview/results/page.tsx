@@ -17,8 +17,8 @@ import {
   type MockResults,
   type SessionResult,
   type RatingLevel,
-} from '../../../lib/interview/mockData';
-import CircularScore from '../../../components/interview/CircularScore';
+} from '@/lib/mockData/interview';
+import CircularScore from '@/components/interview/CircularScore';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Bot, User, PlayCircle, ChevronRight, Flag, Loader2, AlertCircle, Mic, MicOff } from 'lucide-react';
-import { useSpeechRecognition } from '../../../hooks/useSpeechRecognition';
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import {
   getMockQuestions,
   type MockQuestion,
@@ -11,16 +11,15 @@ import {
   type QuestionCount,
   type Difficulty,
   type AnswerFeedback,
-} from '../../../lib/interview/mockData';
-import FeedbackPanel from '../../../components/interview/FeedbackPanel';
-import ApiKeyModal from '../../../components/resume/ApiKeyModal';
+} from '@/lib/mockData/interview';
+import FeedbackPanel from '@/components/interview/FeedbackPanel';
+import ApiKeyModal from '@/components/resume/ApiKeyModal';
 import {
   apiStartInterview,
   apiEvaluateAnswer,
   apiCompleteInterview,
-  extractInterviewError,
   type LiveFeedback,
-} from '../../../lib/api/interview';
+} from '@/lib/api/interview';
 
 type SessionPhase = 'idle' | 'loading' | 'asking' | 'submitted' | 'completed';
 
@@ -149,7 +148,7 @@ function SessionContent() {
       setCurrentIndex(0);
       setPhase('asking');
     } catch (err) {
-      setApiError(extractInterviewError(err));
+      setApiError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
       setPhase('idle');
     } finally {
       setIsLoading(false);
@@ -216,7 +215,7 @@ function SessionContent() {
         // Revert — remove the user bubble, restore answer, go back to asking
         setMessages((prev) => prev.filter((m) => m.id !== `a-${currentIndex}`));
         setUserAnswer(answer);
-        setApiError(extractInterviewError(err));
+        setApiError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
         setPhase('asking');
       } finally {
         setIsLoading(false);

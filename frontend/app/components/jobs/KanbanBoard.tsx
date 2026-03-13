@@ -11,12 +11,12 @@ import {
   type DragStartEvent,
   type DragEndEvent,
 } from '@dnd-kit/core';
-import { useJobs, useCreateJob, useUpdateJob, useDeleteJob } from '../../hooks/useJobs';
-import { useDemoLimit } from '../../hooks/useDemoLimit';
+import { useJobs, useCreateJob, useUpdateJob, useDeleteJob } from '@/hooks/useJobs';
+import { useDemoLimit } from '@/hooks/useDemoLimit';
 import KanbanColumn, { type ColumnConfig } from './KanbanColumn';
 import JobCardContent from './JobCardContent';
 import AddJobModal from './AddJobModal';
-import SearchInput from '../ui/SearchInput';
+import SearchInput from '@/components/ui/SearchInput';
 
 const isDemo = process.env.NEXT_PUBLIC_APP_MODE === 'demo';
 
