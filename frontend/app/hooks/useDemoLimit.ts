@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { jobsApi } from '../lib/api';
+import { jobsApi } from '@/lib/api/jobs';
 
 const STORAGE_KEY = 'prepify_demo_limit';
 const DAILY_LIMIT = 5;

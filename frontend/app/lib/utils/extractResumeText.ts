@@ -1,7 +1,3 @@
-/**
- * Extracts plain text from a resume file (PDF, DOCX, or TXT).
- * Runs entirely in the browser — no data leaves the client until analyzeResume() is called.
- */
 export async function extractResumeText(file: File): Promise<string> {
   const ext = file.name.split('.').pop()?.toLowerCase();
 
@@ -16,7 +12,6 @@ export async function extractResumeText(file: File): Promise<string> {
 
   if (ext === 'pdf' || file.type === 'application/pdf') {
     const pdfjsLib = await import('pdfjs-dist');
-    // Point to the CDN worker so no webpack/bundler config is needed
     pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
     const buffer = await file.arrayBuffer();

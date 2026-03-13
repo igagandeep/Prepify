@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import KanbanBoard from '../../components/jobs/KanbanBoard';
-import { useJobs, useCreateJob } from '../../hooks/useJobs';
-import demoJobs from '../../lib/demoJobs';
-import Modal from '../../components/ui/Modal';
+import Image from 'next/image';
+import KanbanBoard from '@/components/jobs/KanbanBoard';
+import { useJobs, useCreateJob } from '@/hooks/useJobs';
+import demoJobs from '@/lib/mockData/jobs';
+import Modal from '@/components/ui/Modal';
 
 const demoMode = process.env.NEXT_PUBLIC_APP_MODE === 'demo';
 
@@ -52,8 +53,8 @@ export default function JobsPage() {
         title="You're viewing a demo"
       >
         <div className="flex flex-col items-center text-center gap-4 py-1">
-          <img src="/logo-light.png" alt="Prepify" className="h-6 w-auto dark:hidden" />
-          <img src="/logo-dark.png" alt="Prepify" className="h-6 w-auto hidden dark:block" />
+          <Image src="/logo-light.png" alt="Prepify" width={120} height={24} className="h-6 w-auto dark:hidden" />
+          <Image src="/logo-dark.png" alt="Prepify" width={120} height={24} className="h-6 w-auto hidden dark:block" />
           <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
             The <span className="font-semibold">Job Tracker</span> is running in demo mode.
             The job cards you see are pre-seeded sample data — no real applications are

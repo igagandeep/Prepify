@@ -1,12 +1,5 @@
-import type { AnalyzeResult } from '../api/resume';
+import type { AnalyzeResult } from '@/lib/api/resume';
 
-/**
- * Demo result returned in non-local (deployed) builds.
- * Lets visitors explore the full Resume Analyzer UI without needing an API key.
- *
- * IMPORTANT: Do NOT remove this — it powers the public demo.
- * For the real AI analysis, the local/Electron build calls the backend API.
- */
 export const DEMO_RESUME_RESULT: AnalyzeResult = {
   score: 72,
   matchedKeywords: [

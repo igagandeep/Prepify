@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { analyzeResume } from '../resume';
+import { analyzeResume } from '@/lib/api/resume';
 
 // ---------------------------------------------------------------------------
 // Helpers

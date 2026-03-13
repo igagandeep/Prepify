@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { Briefcase, MapPin, DollarSign, Link, FileText } from 'lucide-react';
-import Modal from '../ui/Modal';
-import { jobSchema, STATUS_OPTIONS } from '../../lib/validations/job';
-import type { JobFormData, FieldErrors } from '../../lib/validations/job';
+import Modal from '@/components/ui/Modal';
+import { jobSchema, STATUS_OPTIONS } from '@/lib/validations/job';
+import type { JobFormData, FieldErrors } from '@/lib/validations/job';
 
 const EMPTY_FORM: JobFormData = {
   company: '',

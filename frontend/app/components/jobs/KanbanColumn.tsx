@@ -1,7 +1,7 @@
 'use client';
 
 import { useDroppable } from '@dnd-kit/core';
-import type { Job } from '../../types/job';
+import type { Job } from '@/types/job';
 import JobCard from './JobCard';
 
 export interface ColumnConfig {

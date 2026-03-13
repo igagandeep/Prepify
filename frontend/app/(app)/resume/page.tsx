@@ -14,18 +14,18 @@ import {
   Tags,
   BookOpen,
 } from 'lucide-react';
-import ResumeUpload from '../../components/resume/ResumeUpload';
-import JobDescriptionInput from '../../components/resume/JobDescriptionInput';
-import ScoreGauge from '../../components/resume/ScoreGauge';
-import AreasToImprove from '../../components/resume/AreasToImprove';
-import ScoreBreakdown from '../../components/resume/ScoreBreakdown';
-import KeywordTags from '../../components/resume/KeywordTags';
-import SuggestionCard from '../../components/resume/SuggestionCard';
-import ApiKeyModal from '../../components/resume/ApiKeyModal';
-import Modal from '../../components/ui/Modal';
-import { extractResumeText } from '../../lib/extractResumeText';
-import { analyzeResume, type AnalyzeResult } from '../../lib/api/resume';
-import { DEMO_RESUME_RESULT } from '../../lib/resume/mockData';
+import ResumeUpload from '@/components/resume/ResumeUpload';
+import JobDescriptionInput from '@/components/resume/JobDescriptionInput';
+import ScoreGauge from '@/components/resume/ScoreGauge';
+import AreasToImprove from '@/components/resume/AreasToImprove';
+import ScoreBreakdown from '@/components/resume/ScoreBreakdown';
+import KeywordTags from '@/components/resume/KeywordTags';
+import SuggestionCard from '@/components/resume/SuggestionCard';
+import ApiKeyModal from '@/components/resume/ApiKeyModal';
+import Modal from '@/components/ui/Modal';
+import { extractResumeText } from '@/lib/utils/extractResumeText';
+import { analyzeResume, type AnalyzeResult } from '@/lib/api/resume';
+import { DEMO_RESUME_RESULT } from '@/lib/mockData/resume';
 
 function getIsLive(): boolean {
   if (typeof window === 'undefined') return false;

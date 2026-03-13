@@ -23,25 +23,23 @@ export default function ThemeProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === 'undefined') return 'light';
+    const savedRaw = localStorage.getItem('prepify_theme');
+    if (savedRaw === 'dark' || savedRaw === 'light') return savedRaw;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
 
   useEffect(() => {
-    const savedRaw = localStorage.getItem('prepify_theme');
-    const saved: Theme | null =
-      savedRaw === 'dark' || savedRaw === 'light' ? savedRaw : null;
-    const preferred: Theme = window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
-    const initial = saved ?? preferred;
-    setTheme(initial);
-    document.documentElement.classList.toggle('dark', initial === 'dark');
-  }, []);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
 
   const toggleTheme = () => {
     setTheme((prev) => {
       const next: Theme = prev === 'light' ? 'dark' : 'light';
       localStorage.setItem('prepify_theme', next);
       document.documentElement.classList.toggle('dark', next === 'dark');
+    
       return next;
     });
   };

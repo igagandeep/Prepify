@@ -3,11 +3,10 @@ import {
   apiStartInterview,
   apiEvaluateAnswer,
   apiCompleteInterview,
-  extractInterviewError,
   StartInterviewRequest,
   EvaluateAnswerRequest,
   CompleteInterviewRequest,
-} from '../interview';
+} from '@/lib/api/interview';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -137,24 +136,3 @@ describe('interview API wrappers', () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-// Error extraction helper tests
-// ---------------------------------------------------------------------------
-describe('extractInterviewError()', () => {
-  it('extracts meaningful error messages from Error objects', () => {
-    const err = new Error('Invalid API key. Please check and re-enter.');
-    expect(extractInterviewError(err)).toMatch(/Invalid API key/);
-
-    const netErr = new Error('Cannot reach the server');
-    expect(extractInterviewError(netErr)).toMatch(/Cannot reach/);
-
-    const timeoutErr = new Error('AI service temporarily unavailable. Please try again.');
-    expect(extractInterviewError(timeoutErr)).toMatch(/temporarily unavailable/);
-  });
-
-  it('falls back to generic message for non-Error objects', () => {
-    expect(extractInterviewError({})).toMatch(/Something went wrong/);
-    expect(extractInterviewError(null)).toMatch(/Something went wrong/);
-    expect(extractInterviewError('bad')).toMatch(/Something went wrong/);
-  });
-});

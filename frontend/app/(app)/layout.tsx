@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   LayoutDashboard,
   Briefcase,
@@ -12,7 +13,7 @@ import {
   Sun,
   Moon,
 } from 'lucide-react';
-import { useTheme } from '../providers/ThemeProvider';
+import { useTheme } from '@/providers/ThemeProvider';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -26,10 +27,8 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     try {
       const saved = localStorage.getItem('prepify_username');
       if (!saved) router.replace('/welcome');
@@ -38,16 +37,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
     }
   }, [router]);
 
-  if (!mounted) return null;
-
   const isDark = theme === 'dark';
-  const activeNavStyle = {
-    backgroundColor: isDark ? 'rgba(99,102,241,0.15)' : '#EEF0FD',
-    color: isDark ? '#818cf8' : '#3948CF',
-  };
-  const inactiveColor = isDark ? '#9ca3af' : '#6b7280';
-  const hoverBg = isDark ? '#1f2937' : '#f9fafb';
-  const hoverColor = isDark ? '#f9fafb' : '#111827';
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
@@ -55,9 +45,11 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
         <aside className="w-56 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col shrink-0">
           <div className="pl-5 pr-4 py-4 flex items-center border-b border-gray-100 dark:border-gray-700">
             <Link href="/">
-              <img
+              <Image
                 src={isDark ? '/logo-dark.png' : '/logo-light.png'}
                 alt="Prepify"
+                width={120}
+                height={24}
                 className="h-6 w-auto max-w-full"
               />
             </Link>
@@ -70,20 +62,11 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
                 <Link
                   key={href}
                   href={href}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                  style={isActive ? activeNavStyle : { color: inactiveColor }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.backgroundColor = hoverBg;
-                      e.currentTarget.style.color = hoverColor;
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.backgroundColor = '';
-                      e.currentTarget.style.color = inactiveColor;
-                    }
-                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'bg-[#EEF0FD] text-[#3948CF] dark:bg-indigo-500/15 dark:text-indigo-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-50'
+                  }`}
                 >
                   <Icon className="w-4 h-4 shrink-0" />
                   {label}
@@ -97,7 +80,7 @@ export default function AppShellLayout({ children }: { children: React.ReactNode
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="px-3 py-2 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
           <button
-            onClick={() => setSidebarOpen((v) => !v)}
+            onClick={() => setSidebarOpen((v: boolean) => !v)}
             aria-label="Toggle sidebar"
             className="p-1.5 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >

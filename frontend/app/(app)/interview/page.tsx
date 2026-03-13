@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
-import type { InterviewType, Difficulty, QuestionCount } from '../../lib/interview/mockData';
-import Modal from '../../components/ui/Modal';
+import type { InterviewType, Difficulty, QuestionCount } from '@/lib/mockData/interview';
+import Modal from '@/components/ui/Modal';
 
 function getIsLive(): boolean {
   if (typeof window === 'undefined') return true;
