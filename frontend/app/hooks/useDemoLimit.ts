@@ -28,26 +28,25 @@ function writeState(state: DemoLimitState) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-export function useDemoLimit() {
-  const [state, setState] = useState<DemoLimitState>({
-    date: todayStr(),
-    count: 0,
-    addedIds: [],
-  });
+let pendingStaleIds: string[] = [];
 
-  useEffect(() => {
+export function useDemoLimit() {
+  const [state, setState] = useState<DemoLimitState>(() => {
     const current = readState();
     if (current.date !== todayStr()) {
-      // New day: silently delete jobs added yesterday
-      current.addedIds.forEach((id) => {
-        jobsApi.delete(id).catch(() => {});
-      });
+      pendingStaleIds = current.addedIds;
       const reset: DemoLimitState = { date: todayStr(), count: 0, addedIds: [] };
       writeState(reset);
-      setState(reset);
-    } else {
-      setState(current);
+      return reset;
     }
+    return current;
+  });
+
+  // Side-effect only: delete stale jobs from the previous day
+  useEffect(() => {
+    const ids = pendingStaleIds;
+    pendingStaleIds = [];
+    ids.forEach((id) => jobsApi.delete(id).catch(() => {}));
   }, []);
 
   const recordAdd = useCallback((id: string) => {

@@ -8,9 +8,10 @@ interface JobCardContentProps {
   job: Job;
   onDelete?: (id: string) => void;
   showMenu?: boolean;
+  onViewDetails?: (job: Job) => void;
 }
 
-export default function JobCardContent({ job, onDelete, showMenu = true }: JobCardContentProps) {
+export default function JobCardContent({ job, onDelete, showMenu = true, onViewDetails }: JobCardContentProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -26,7 +27,7 @@ export default function JobCardContent({ job, onDelete, showMenu = true }: JobCa
   }, [menuOpen]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2" onClick={() => onViewDetails?.(job)}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           <div
