@@ -9,9 +9,10 @@ interface JobCardProps {
   job: Job;
   onDelete: (id: string) => void;
   isDraggingOriginal: boolean;
+  onViewDetails: (job: Job) => void;
 }
 
-export default function JobCard({ job, onDelete, isDraggingOriginal }: JobCardProps) {
+export default function JobCard({ job, onDelete, isDraggingOriginal, onViewDetails }: JobCardProps) {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: job.id });
 
   return (
@@ -25,7 +26,7 @@ export default function JobCard({ job, onDelete, isDraggingOriginal }: JobCardPr
       {...listeners}
       className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3.5 shadow-sm select-none touch-none cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow"
     >
-      <JobCardContent job={job} onDelete={onDelete} />
+      <JobCardContent job={job} onDelete={onDelete} onViewDetails={onViewDetails} />
     </div>
   );
 }

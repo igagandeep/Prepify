@@ -18,9 +18,10 @@ interface KanbanColumnProps {
   jobs: Job[];
   activeId: string | null;
   onDelete: (id: string) => void;
+  onViewDetails: (job: Job) => void;
 }
 
-export default function KanbanColumn({ column, jobs, activeId, onDelete }: KanbanColumnProps) {
+export default function KanbanColumn({ column, jobs, activeId, onDelete , onViewDetails}: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
 
   return (
@@ -46,9 +47,12 @@ export default function KanbanColumn({ column, jobs, activeId, onDelete }: Kanba
             job={job}
             onDelete={onDelete}
             isDraggingOriginal={activeId === job.id}
+            onViewDetails={onViewDetails}
           />
         ))}
       </div>
     </div>
   );
 }
+
+

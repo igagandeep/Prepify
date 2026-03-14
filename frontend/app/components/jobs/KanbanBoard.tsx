@@ -17,6 +17,8 @@ import KanbanColumn, { type ColumnConfig } from './KanbanColumn';
 import JobCardContent from './JobCardContent';
 import AddJobModal from './AddJobModal';
 import SearchInput from '@/components/ui/SearchInput';
+import { Job } from '@/types/job';
+import JobDetailsModal from './JobDetailsModal';
 
 const isDemo = process.env.NEXT_PUBLIC_APP_MODE === 'demo';
 
@@ -65,6 +67,7 @@ const COLUMNS: ColumnConfig[] = [
 
 export default function KanbanBoard() {
   const { data: jobs = [], isLoading, isError } = useJobs();
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const createJob = useCreateJob();
   const updateJob = useUpdateJob();
   const deleteJob = useDeleteJob();
@@ -104,6 +107,10 @@ export default function KanbanBoard() {
     updateJob.mutate({ id: jobId, data: { status: newStatus } });
   }
 
+  function onViewDetails(job: Job) {
+    setSelectedJob(job);
+  }
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center text-sm text-gray-400 dark:text-gray-500">
@@ -121,7 +128,7 @@ export default function KanbanBoard() {
   }
 
   return (
-    <div className="flex flex-col h-full gap-5">
+    <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between flex-shrink-0">
         <SearchInput
           value={search}
@@ -155,6 +162,7 @@ export default function KanbanBoard() {
               jobs={displayed.filter((j) => j.status === col.id)}
               activeId={activeId}
               onDelete={(id) => deleteJob.mutate(id)}
+              onViewDetails={onViewDetails}
             />
           ))}
         </div>
@@ -179,6 +187,11 @@ export default function KanbanBoard() {
           })
         }
         isPending={createJob.isPending}
+      />
+      <JobDetailsModal
+        job={selectedJob}
+        onClose={() => setSelectedJob(null)}
+        
       />
     </div>
   );
