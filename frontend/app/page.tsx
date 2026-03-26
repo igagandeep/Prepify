@@ -485,18 +485,15 @@ function MarketingHomepage() {
               <Download className="w-5 h-5" />
               Download for Windows
             </a>
-            <div className="relative group w-full sm:w-auto">
-              <button
-                disabled={true}
-                className="btn-secondary flex items-center gap-2 px-8 py-4 text-base w-full justify-center opacity-50 cursor-not-allowed"
-              >
-                <Globe className="w-5 h-5" />
-                Chrome Extension
-              </button>
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-slate-800 border border-white/10 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                Coming soon to the Chrome Web Store
-              </div>
-            </div>
+            <a
+              href="https://chromewebstore.google.com/detail/prepify-job-tracker/kkodlhbginbekkfhijcklohbbdpdfkbf?hl=en-US&utm_source=ext_sidebar"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary flex items-center gap-2 px-8 py-4 text-base w-full sm:w-auto justify-center"
+            >
+              <Globe className="w-5 h-5" />
+              Chrome Extension
+            </a>
           </motion.div>
 
           {/* Windows requirement note */}
